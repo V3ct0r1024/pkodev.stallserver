@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Packet Handlers">
+      <UniqueIdentifier>{339d398e-ad88-4adc-9973-9c0ada174cde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packet Handlers\S -&gt; C">
+      <UniqueIdentifier>{1dc4c4fd-1384-4cee-9035-8cee0fdcd04a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packets">
+      <UniqueIdentifier>{5fefb8e2-9c91-49bc-87a8-ff0d898699eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packets\S -&gt; C">
+      <UniqueIdentifier>{dfa65f18-8865-44cf-b87b-c492a6312e30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packets\C -&gt; S">
+      <UniqueIdentifier>{7d9859ce-eb33-4eff-83fb-58dbf3040fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packet Handlers\C -&gt; S">
+      <UniqueIdentifier>{74ee17d2-abe4-472a-8cd3-cddaa8103148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buffer">
+      <UniqueIdentifier>{574e19ea-40ee-4285-9c3f-0cec9f0019ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encryption">
+      <UniqueIdentifier>{aefb4c57-5acd-4435-acdc-4608ffd980b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config File">
+      <UniqueIdentifier>{529aa6f2-2a2f-4636-b6eb-605317c3e340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{28734508-e4f0-48ba-bc3a-3cc9550a4059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{48ace4e3-1cf3-49d6-a492-5a1f56a87016}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ChapStringPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>Packet Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="Packet.cpp">
+      <Filter>Packets</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandlerStorage.cpp">
+      <Filter>Packet Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginResultPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="SetStallSuccessPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="SetStallClosePacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="DisconnectPacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="PingRequestPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="PingResponsePacket.cpp">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginPacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginPacket.cpp">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="CreatePinPacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="UpdatePinPacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="LinearBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemNoticePacket.cpp">
+      <Filter>Packets\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="EnterMapPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="DES.cpp">
+      <Filter>Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="CommEncrypt.cpp">
+      <Filter>Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigFile.cpp">
+      <Filter>Config File</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Bridge.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectPool.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="IpAddressBook.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="BridgeList.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="DisconnectPacket.cpp">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PersonalMessagePacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="PersonalMessagePacket.cpp">
+      <Filter>Packets\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="FriendInvitePacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="TeamInvitePacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="TalkSessionCreatePacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ChapStringPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>Packet Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>Packets</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandlerStorage.h">
+      <Filter>Packet Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginResultPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="SetStallSuccessPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="SetStallClosePacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="DisconnectPacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="PingRequestPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="PingResponsePacket.h">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginPacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginPacket.h">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="CreatePinPacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="UpdatePinPacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemNoticePacket.h">
+      <Filter>Packets\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="EnterMapPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="DES.h">
+      <Filter>Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="CommEncrypt.h">
+      <Filter>Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigFile.h">
+      <Filter>Config File</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Bridge.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="IpAddressBook.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="BridgeList.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="DisconnectPacket.h">
+      <Filter>Packets\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PersonalMessagePacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="PersonalMessagePacket.h">
+      <Filter>Packets\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="FriendInvitePacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="TeamInvitePacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="TalkSessionCreatePacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="datatype.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

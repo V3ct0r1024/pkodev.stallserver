@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{cffb8be3-1a28-473f-9d02-77eca0e95c18}</ProjectGuid>
+    <RootNamespace>StallServer</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\lib\libevent\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\lib\libevent\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\tmp\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\..\lib\libevent\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\..\lib\libevent\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\tmp\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;libevent.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;libevent.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Bridge.cpp" />
+    <ClCompile Include="BridgeList.cpp" />
+    <ClCompile Include="ChapStringPacketHandler.cpp" />
+    <ClCompile Include="DisconnectPacket.cpp" />
+    <ClCompile Include="FriendInvitePacketHandler.cpp" />
+    <ClCompile Include="IpAddressBook.cpp" />
+    <ClCompile Include="CommEncrypt.cpp" />
+    <ClCompile Include="ConfigFile.cpp" />
+    <ClCompile Include="CreatePinPacketHandler.cpp" />
+    <ClCompile Include="DES.cpp" />
+    <ClCompile Include="DisconnectPacketHandler.cpp" />
+    <ClCompile Include="EnterMapPacketHandler.cpp" />
+    <ClCompile Include="LinearBuffer.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="LoginPacket.cpp" />
+    <ClCompile Include="LoginPacketHandler.cpp" />
+    <ClCompile Include="LoginResultPacketHandler.cpp" />
+    <ClCompile Include="ObjectPool.cpp" />
+    <ClCompile Include="Packet.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="PacketHandlerStorage.cpp" />
+    <ClCompile Include="PersonalMessagePacket.cpp" />
+    <ClCompile Include="PersonalMessagePacketHandler.cpp" />
+    <ClCompile Include="PingRequestPacketHandler.cpp" />
+    <ClCompile Include="PingResponsePacket.cpp" />
+    <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="SetStallClosePacketHandler.cpp" />
+    <ClCompile Include="SetStallSuccessPacketHandler.cpp" />
+    <ClCompile Include="SystemNoticePacket.cpp" />
+    <ClCompile Include="TalkSessionCreatePacketHandler.cpp" />
+    <ClCompile Include="TeamInvitePacketHandler.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="UpdatePinPacketHandler.cpp" />
+    <ClCompile Include="Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bridge.h" />
+    <ClInclude Include="BridgeList.h" />
+    <ClInclude Include="ChapStringPacketHandler.h" />
+    <ClInclude Include="datatype.h" />
+    <ClInclude Include="DisconnectPacket.h" />
+    <ClInclude Include="FriendInvitePacketHandler.h" />
+    <ClInclude Include="IpAddressBook.h" />
+    <ClInclude Include="CommEncrypt.h" />
+    <ClInclude Include="ConfigFile.h" />
+    <ClInclude Include="CreatePinPacketHandler.h" />
+    <ClInclude Include="DES.h" />
+    <ClInclude Include="DisconnectPacketHandler.h" />
+    <ClInclude Include="EnterMapPacketHandler.h" />
+    <ClInclude Include="LinearBuffer.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LoginPacket.h" />
+    <ClInclude Include="LoginPacketHandler.h" />
+    <ClInclude Include="LoginResultPacketHandler.h" />
+    <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="Packet.h" />
+    <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="PacketHandlerStorage.h" />
+    <ClInclude Include="PersonalMessagePacket.h" />
+    <ClInclude Include="PersonalMessagePacketHandler.h" />
+    <ClInclude Include="PingRequestPacketHandler.h" />
+    <ClInclude Include="PingResponsePacket.h" />
+    <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="Server.h" />
+    <ClInclude Include="SetStallClosePacketHandler.h" />
+    <ClInclude Include="SetStallSuccessPacketHandler.h" />
+    <ClInclude Include="SystemNoticePacket.h" />
+    <ClInclude Include="TalkSessionCreatePacketHandler.h" />
+    <ClInclude Include="TeamInvitePacketHandler.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="UpdatePinPacketHandler.h" />
+    <ClInclude Include="Utils.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
