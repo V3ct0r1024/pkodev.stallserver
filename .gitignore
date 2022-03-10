@@ -342,3 +342,4 @@ healthchecksdb
 # V3ct0r1024
 logs
 tmp
+*.exe
