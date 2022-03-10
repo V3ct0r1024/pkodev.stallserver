@@ -16,8 +16,8 @@ Stall Server project for TOP/PKO/KOP game for the implementation of a system of 
 The application is currently under development. The application has not been fully tested and is not stable. This means that errors, bugs and critical vulnerabilities may be present. Use it for testing purposes only!
 
 ## to-do
-* Translate comments in files **Server.h** and **Server.cpp** to English language;
-* Fix application crash when processing packets;
+* ~~Translate comments in files **Server.h** and **Server.cpp** to English language;~~
+* ~~Fix application crash when processing packets;~~
 * Fix application crash on startup when local port is closed;
 * Make thread synchronization when processing packets;
 * Close the offline stall if it is empty (sold out);
