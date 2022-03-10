@@ -51,7 +51,7 @@ namespace pkodev
 		int length = sizeof(errcode);
 
 		// Get socket error code
-		int ret = getsockopt(fd, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&errcode), &length);
+		const int ret = getsockopt(fd, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&errcode), &length);
 
 		// Check getsockopt() function
 		if (ret == SOCKET_ERROR)
@@ -78,7 +78,7 @@ namespace pkodev
 		for (unsigned int i = 0; i < mac_address.length(); ++i)
 		{
 			// Take current character
-			unsigned char c = static_cast<unsigned char>(mac_address[i]);
+			const unsigned char c = static_cast<unsigned char>(mac_address[i]);
 
 			// Every 3rd character must be a hyphen (-)
 			if ( ( (i + 1) % 3 == 0 ) && (c != '-') )
@@ -115,7 +115,7 @@ namespace pkodev
 		for (unsigned int i = 0; i < md5_hash.length(); ++i)
 		{
 			// Take current character
-			unsigned char c = static_cast<unsigned char>(md5_hash[i]);
+			const unsigned char c = static_cast<unsigned char>(md5_hash[i]);
 
 			// Characters can take on the values
 			// 0 - 1
@@ -133,36 +133,30 @@ namespace pkodev
 
 
 	// Convert string to lowercase
-	std::string utils::string::lower_case(const std::string& str)
+	std::string utils::string::lower_case(std::string str)
 	{
-		// Copy the source string
-		std::string lower(str);
-
 		// Convert the string
-		std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 
 		// Return the converted string
-		return lower;
+		return str;
 	}
 
 	// Convert string to uppercase
-	std::string utils::string::upper_case(const std::string& str)
+	std::string utils::string::upper_case(std::string str)
 	{
-		// Copy the source string
-		std::string upper(str);
-
 		// Convert the string
-		std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+		std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 
 		// Return the converted string
-		return upper;
+		return str;
 	}
 
 	// Remove leading whitespace from a string
 	std::string utils::string::left_trim(const std::string& str, const std::string& whitespace)
 	{
 		// Looking for whitespaces at the beginning of a string
-		std::size_t pos = str.find_first_not_of(whitespace);
+		const std::size_t pos = str.find_first_not_of(whitespace);
 
 		// Remove spaces at the beginning of a string
 		if (std::string::npos != pos) 
@@ -177,7 +171,7 @@ namespace pkodev
 	std::string utils::string::right_trim(const std::string& str, const std::string& whitespace)
 	{
 		// Looking for whitespaces at the end of a string
-		std::size_t pos = str.find_last_not_of(whitespace);
+		const std::size_t pos = str.find_last_not_of(whitespace);
 
 		// Remove spaces at the end of a string
 		if (std::string::npos != pos)
@@ -198,7 +192,7 @@ namespace pkodev
 	std::string utils::file::extract_filename(const std::string& path)
 	{
 		// Looking for last slash
-		std::size_t pos = path.find_last_of("/\\");
+		const std::size_t pos = path.find_last_of("/\\");
 
 		// Check that the slash is found
 		if (pos != std::string::npos)
@@ -207,7 +201,6 @@ namespace pkodev
 			return path.substr(pos + 1);
 		}
 
-		// Could not extract filename
 		return path;
 	}
 
@@ -215,7 +208,7 @@ namespace pkodev
 	std::string utils::file::extract_filepath(const std::string& path)
 	{
 		// Looking for last slash
-		std::size_t pos = path.find_last_of("/\\");
+		const std::size_t pos = path.find_last_of("/\\");
 
 		// Check that the slash is found
 		if (pos != std::string::npos)
@@ -224,7 +217,6 @@ namespace pkodev
 			return path.substr(0, pos);
 		}
 
-		// Could not extract directory
 		return path;
 	}
 
@@ -232,7 +224,7 @@ namespace pkodev
 	std::string utils::file::change_fileext(const std::string& path, const std::string& ext)
 	{
 		// Looking for an extension dot
-		std::size_t pos = path.find_last_of('.');
+		const std::size_t pos = path.find_last_of('.');
 
 		// Check that the extension dot is found
 		if (pos != std::string::npos)

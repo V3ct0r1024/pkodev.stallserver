@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     );
 
     // Set console window title
-    SetConsoleTitle(L"PKODev.NET :: Stall Server");
+    SetConsoleTitle(L"PKOdev.NET :: Stall Server");
 
     // Print welcome message
     Welcome();

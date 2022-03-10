@@ -29,14 +29,14 @@
 
 namespace pkodev
 {
-	// Счетчик экземпляров класса
+	// Class instance counter
 	std::size_t Server::instance_counter = 0;
 
-	// Флаг вывода списка обработчиков
+	// Packet handlers list output flag
 	bool Server::worker::handlers_log = false;
 
 
-	// Конструктор инициализатора
+	// Server initializer constructor
 	Server::initializer::initializer(std::function<void()> init_,
 		std::function<void()> destroy_) :
 		init(std::move(init_)),
@@ -46,7 +46,7 @@ namespace pkodev
 
 	}
 
-	// Перемещающий конструктор инициализатора
+	// Server initializer move constructor
 	Server::initializer::initializer(initializer&& other) noexcept :
 		init(std::move(other.init)),
 		destroy(std::move(other.destroy)),
@@ -55,7 +55,7 @@ namespace pkodev
 
 	}
 
-	// Копирующий конструктор инициализатора
+	// Server initializer copy constructor
 	Server::initializer::initializer(const initializer& other) :
 		init(other.init),
 		destroy(other.destroy),
@@ -66,7 +66,7 @@ namespace pkodev
 
 
 
-	// Конструктор рабочего
+	// Server worker constructor
 	Server::worker::worker(event_base* base, std::thread&& th) :
 		evbase(base), 
 		th(std::move(th)), 
@@ -74,7 +74,7 @@ namespace pkodev
 		out_lock(std::make_shared<std::recursive_mutex>()),
 		data_lock(std::make_shared<std::recursive_mutex>())
 	{
-		// Создаем обработчики пакетов
+		// Create a list of network packets handlers
 		handlers = std::make_shared<PacketHandlerStorage>();
 
 		// S -> C
@@ -95,22 +95,22 @@ namespace pkodev
 		handlers->add_handler(std::make_shared<TeamInvitePacketHandler>());
 		handlers->add_handler(std::make_shared<TalkSessionCreatePacketHandler>());
 
-		// Выводим список обработчиков
+		// Print the list of registered handlers to the log
 		if (handlers_log == false)
 		{
-			// Поднимаем флаг
+			// Raise the flag
 			handlers_log = true;
 
-			// Напечатаем список обработчиков
+			// Print the list of handlers
 			{
-				// Обработчик
+				// Handler related data
 				struct handler_info
 				{
-					// Поля
-					unsigned short int id;    // ID обработчика
-					std::string name;         // Название обработчика
+					// Fields
+					unsigned short int id;    // Handler ID
+					std::string name;         // Handler name
 
-					// Конструктор
+					// Constructor
 					handler_info(unsigned short int id_, const std::string& name_) :
 						id(id_),
 						name(name_)
@@ -119,10 +119,10 @@ namespace pkodev
 					}
 				};
 
-				// Список интервалов пакетов
+				// Packet IDs intervals list
 				std::vector< std::pair<unsigned short int, unsigned short int> > handler_intervals;
 
-				// Заполняем список интвералов
+				// Fill in the list of intervals
 				{
 					// Game.exe -> GameServer.exe
 					handler_intervals.push_back(
@@ -145,23 +145,23 @@ namespace pkodev
 					);
 				}
 
-				// Списки обработчиков
-				std::vector<handler_info> client_handlers;   // От Game.exe
-				std::vector<handler_info> server_handlers;   // От GateServer.exe
+				// Handlers lists
+				std::vector<handler_info> client_handlers;   // From Game.exe
+				std::vector<handler_info> server_handlers;   // From GateServer.exe
 
-				// Собираем список обработчиков
+				// Build a list of handlers
 				for (const auto& interval : handler_intervals)
 				{
-					// Проходим по интвералу
+					// Walking through the interval
 					for (unsigned short int i = interval.first; i < interval.second; ++i)
 					{
-						// Проверим, что обработчик с данным ID зарегистрирован
+						// Check that the handler with the given ID is registered
 						if (handlers->check_handler(i) == true)
 						{
-							// Получим указатель на обработчик
+							// Get a handler reference
 							const handler_ptr_t& handler = handlers->get_handler(i);
 
-							// Проверим направление перечади
+							// Check the transfer direction
 							switch (handler->direction())
 							{
 								// Game.exe -> GateServer.exe
@@ -182,38 +182,38 @@ namespace pkodev
 					}
 				}
 
-				// Условие сортировки обработчиков по ID
+				// Condition for sorting handlers by ID
 				auto sort_cond = [](const handler_info& info1, const handler_info& info2)
 				{
 					return (info1.id < info2.id);
 				};
 
-				// Отсортируем списки по ID
+				// Sort lists by ID
 				std::sort(client_handlers.begin(), client_handlers.end(), sort_cond);
 				std::sort(server_handlers.begin(), server_handlers.end(), sort_cond);
 
-				// Выводим обработчики пакетов от Game.exe
+				// Print packet handlers from Game.exe to the log
 				{
-					// Напишем лог
+					// Write a log
 					Logger::Instance().log("Registered (%d) Game.exe packet handlers:", client_handlers.size());
 
-					// Проходимся по списку обработчиков
+					// Walking through the list
 					for (const auto& info : client_handlers)
 					{
-						// Напишем лог
+						// Print a handler . . .
 						Logger::Instance().log("* Packet ID %d (%04X): %s.", info.id, info.id, info.name.c_str());
 					}
 				}
 
-				// Выводим обработчики пакетов от GateServer.exe
+				// Print packet handlers from GateServer.exe to the log
 				{
-					// Напишем лог
+					// Write a log
 					Logger::Instance().log("Registered (%d) GateServer.exe packet handlers:", server_handlers.size());
 
-					// Проходимся по списку обработчиков
+					// Walking through the list
 					for (const auto& info : server_handlers)
 					{
-						// Напишем лог
+						// Print a handler . . .
 						Logger::Instance().log("* Packet ID %d (%04X): %s.", info.id, info.id, info.name.c_str());
 					}
 				}
@@ -221,7 +221,7 @@ namespace pkodev
 		}
 	}
 
-	// Перемещающий конструктор рабочего
+	// Server worker move constructor
 	Server::worker::worker(worker&& w) noexcept:
 		evbase(w.evbase), 
 		th(std::move(w.th)),
@@ -233,18 +233,18 @@ namespace pkodev
 
 	}
 	
-	
-	// Заглушка для функции инициализатора
+
+	// Dummy function for the server initializer 
 	static void _nop() {}
 
-	// Конструктор сервера
+	// Server constructor
 	Server::Server(const settings_t& settings_) :
 		m_cfg(settings_),
 		m_running(false), 
 		m_workers_ready(false), m_workers_stop(false),
 		m_listener(nullptr)
 	{
-		// Check the number of instances
+		// Check the number of instances of the class
 		if (Server::instance_counter == 0)
 		{
 			// Make libevent threadsafe
@@ -258,9 +258,9 @@ namespace pkodev
 			}
 		}
 
-		// Заполнняем список инициализации ресурсов
+		// Fill out the resource initialization list
 		{
-			// Конечное освобождение ресурсов
+			// Final release of resources
 			m_inits.push_back(
 				{
 					_nop,
@@ -268,7 +268,7 @@ namespace pkodev
 				}
 			);
 
-			// Загрузка библиотеки WinSock2
+			// Load WinSock library
 			m_inits.push_back(
 				{
 					std::bind(std::mem_fn(&Server::init_winsock), this),
@@ -276,7 +276,7 @@ namespace pkodev
 				}
 			);
 
-			// Пул сетевых мостов
+			// Memory allocation for clients
 			m_inits.push_back(
 				{
 					std::bind(std::mem_fn(&Server::init_bridge_pool), this),
@@ -284,7 +284,7 @@ namespace pkodev
 				}
 			);
 
-			// Рабочие потоки
+			// Initialization of worker threads
 			m_inits.push_back(
 				{
 					std::bind(std::mem_fn(&Server::init_workers), this),
@@ -292,7 +292,7 @@ namespace pkodev
 				}
 			);
 
-			// Прослушивание входящих соединений
+			// Initialize listening for incoming connections
 			m_inits.push_back(
 				{
 					std::bind(std::mem_fn(&Server::init_listener), this),
@@ -300,7 +300,7 @@ namespace pkodev
 				}
 			);
 
-			// Первичное освобождение ресурсов
+			// Initial release of resources
 			m_inits.push_back(
 				{
 					_nop,
@@ -309,114 +309,114 @@ namespace pkodev
 			);
 		}
 
-		// Увеличиваем счетчик экземпляров
+		// Increase the class instances counter
 		Server::instance_counter++;
 	}
 
-	// Деструктор сервера
+	// Server destructor
 	Server::~Server()
 	{
-		// Останавливаем сервер
+		// Stop the server
 		stop();
 
-		// Уменьшаем счетчик экземпляров
+		// Decrease the class instances counter
 		Server::instance_counter--;
 	}
 
-	// Первичное освобождение ресурсов
+	// Initial release of resources
 	void Server::initial_cleanup()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Initial cleanup . . .");
 
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Initial cleanup done!");
 	}
 
-	// Конечное освобождение ресурсов
+	// Final release of resources
 	void Server::final_cleanup()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Final cleanup . . .");
 
-		// Удаляем список IP-адресов
+		// Delete list of IP addresses
 		m_ip_book.clear();
 
-		// Очищаем список мостов
+		// Clear the lists of network bridges
 		m_connected_bridges.clear();
 		m_offline_stall_bridges.clear();
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Final cleanup done!");
 	}
 
-	// Загрузить библиотеку WinSock
+	// Load WinSock library
 	void Server::init_winsock()
 	{
-		// Проверим первый экземпляр сервера
+		// Check the number of server instances
 		if (Server::instance_counter == 1)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Loading Winsock . . .");
 
-			// Структура с данными о реализации сокетов
+			// Structure with socket implementation data
 			WSAData wsaData;
 			std::memset(reinterpret_cast<void*>(&wsaData), 0x00, sizeof(wsaData));
 
-			// Загружаем библиотеку WinSock
+			// Load WinSock 2.2 library
 			int ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-			// Проверим результат
+			// Check the result
 			if (ret != 0)
 			{
-				// Выбрасываем исключение
+				// Raise an exception
 				throw server_exception(
 					std::string("WSAStartup() failed with error code " + std::to_string(WSAGetLastError()) + "!")
 				);
 			}
 
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Winsock loaded!");
 		}
 	}
 
-	// Выгрузить библиотеку WinSock
+	// Release WinSock library
 	void Server::destroy_winsock()
 	{
-		// Проверим первый экземпляр сервера
+		// Check the number of server instances
 		if (Server::instance_counter == 1)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Clearing Winsock . . .");
 
-			// Выгружаем библиотеку WinSock
+			// Release WinSock 2.2 library
 			int ret = WSACleanup();
 
-			// Проверим код ошибки
+			// Check the result
 			if (ret != 0)
 			{
-				// Напишем лог
+				// Write a log
 				Logger::Instance().log("WSACleanup() failed with error code %d!", WSAGetLastError());
 			}
 			else
 			{
-				// Напишем лог
+				// Write a log
 				Logger::Instance().log("Winsock cleared!");
 			}
 		}
 	}
 
-	// Выделить память под клиенты
+	// Network clients memory allocation 
 	void Server::init_bridge_pool()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Allocating memory for %d clients . . .", m_cfg.max_player);
 
-		// Создаем пул сетевых мостов
+		// Create a pool of network bridges
 		try
 		{
-			// Выделяем память под max_player клиетов
+			// Allocate memory for max_player clients
 			m_bridge_pool = std::make_unique<CObjectPool>(
 				std::make_unique<BridgeMaker>(*this),
 				m_cfg.max_player
@@ -424,26 +424,26 @@ namespace pkodev
 		}
 		catch (const std::bad_alloc& e)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Can't allocate memory: %s", e.what());
 
-			// Недостаточно памяти чтобы создать пул мостов
+			// Not enough memory to create network bridge pool
 			throw server_exception(
 				std::string("Can't create client pool: " + std::string(e.what()))
 			);
 		}
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Memory successfully allocated!");
 	}
 
-	// Освободить память из под клиентов
+	// Network clients memory deallocation 
 	void Server::destroy_bridge_pool()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Releasing client memory . . .");
 
-		// Возвращаем сетевые мосты в пул
+		// Return network bridges to the pool
 		m_connected_bridges.for_each(
 			[&](Bridge& bridge, bool& stop)
 			{
@@ -451,43 +451,41 @@ namespace pkodev
 			}
 		);
 
-		// Удаляем пул мостов
+		// Delete the pool
 		m_bridge_pool.reset();
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Memory released!");
 	}
 
-	// Запустить рабочие потоки
+	// Start worker threads
 	void Server::init_workers()
 	{
-		// Сбросим флаги запуска рабочих
+		// Reset workers flags
 		m_workers_ready = false;
 		m_workers_stop = false;
 
-		// Получим число рабочих потоков
+		// Get the amount of available worker threads
 		std::size_t count = static_cast<std::size_t>(
 			max(2, std::thread::hardware_concurrency())
 		);
 
-		count = 1;
-
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Starting %d worker threads . . .", count);
 
-		// Выделим память в списке под рабочие потоки
+		// Allocate some memory for the workers list
 		m_workers.reserve(count);
 
-		// Запускаем рабочие потоки
+		// Start all worker threads
 		for (std::size_t i = 0; i < count; ++i)
 		{
-			// Создаем ядро событий
+			// Create an event base
 			event_base* evbase = event_base_new();
 
-			// Проверим, что ядро событий было создано
+			// Check that the event base has been created
 			if (evbase != nullptr)
 			{
-				// Запускаем рабочий поток
+				// Start a thread for the new worker
 				std::thread th(
 					std::bind(
 						std::mem_fn(&pkodev::Server::work),
@@ -495,118 +493,118 @@ namespace pkodev
 					)
 				);
 				
-				// Получим ID потока
+				// Get the thread ID
 				std::thread::id thread_id = th.get_id();
 
-				// Создаем рабочего и помещаем его в список рабочих
+				// Initialize the worker and put it in the list of workers
 				m_workers.push_back({evbase, std::move(th)});
 				
-				// Напишем лог
+				// Write a log
 				Logger::Instance().log("Worker thread %d/%d (ID: %04X) successfully started!", (i + 1), count, thread_id);
 			}
 			else
 			{
-				// Не удалось создать ядро событий
+				// Failed to create event base
 				m_workers_stop = true;
 
-				// Останавливаем потоки, которые успели запуститься
+				// Stop workers that have already started
 				for (auto& w : m_workers)
 				{
-					// Присоединяем поток рабочего к основному
+					// Attach the worker's thread to the main thread
 					if (w.th.joinable() == true)
 					{
 						w.th.join();
 					}
 
-					// Удаляем ядро событий
+					// Free the worker's event base
 					event_base_free(w.evbase);
 				}
 
-				// Очищаем список рабочих
+				// Clear the list of workers
 				m_workers.clear();
 
-				// Напишем лог
+				// Write a log
 				Logger::Instance().log("Failed to create worker thread %d/%d!", (i + 1), count);
 
-				// Ошибка
+				// Raise the server exception
 				throw server_exception("Failed to create worker threads!");;
 			}
 		}
 
-		// Рабочие запущены
+		// Workers started
 		m_workers_ready = true;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("All worker threads are successfully started!");
 	}
 
-	// Остановить рабочие потоки
+	// Stop worker threads
 	void Server::destroy_workers()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Stopping all worker threads . . .");
 
-		// Останавливаем все рабочие потоки
+		// Stop all workers
 		for (auto& w : m_workers)
 		{
-			// Останавливаем цикл событий рабочего
+			// Stop the worker's event loop
 			event_base_loopbreak(w.evbase);
 
-			// Получим ID рабочего потока 
+			// Get the worker's ID
 			std::thread::id thread_id = w.th.get_id();
 
-			// Присоединяем поток к основному
+			// Attach the worker's thread to the main thread
 			if (w.th.joinable() == true)
 			{
 				w.th.join();
 			}	
 			
-			// Удаляем ядро событий
+			// Free the worker's event base
 			event_base_free(w.evbase);
 
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Worker thread (ID: %04X) successfully stopped!", thread_id);
 		}
 
-		// Очищаем список рабочих
+		// Clear the list of workers
 		m_workers.clear();
 
-		// Сбросим флаг готовности рабочих
+		// Reset the workers ready flag
 		m_workers_ready = false;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("All worker threads are successfully stopped!");
 	}
 
-	// Начать прослушивание входящих соединений
+	// Start listen for incoming connections
 	void Server::init_listener()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("The process of listening for incoming connections on address (%s:%d) starts . . .", m_cfg.game_host.c_str(), m_cfg.game_port);
 
-		// Структура локального адреса
+		// The local address structure
 		sockaddr_in local;
 		std::memset(reinterpret_cast<void*>(&local), 0x00, sizeof(local));
 
-		// Заполняем структуру локального адреса
+		// Fill in the local address structure
 		local.sin_family = AF_INET;
 		local.sin_port = htons(m_cfg.game_port);
 		int ret = inet_pton(AF_INET, m_cfg.game_host.c_str(), &local.sin_addr);
 
-		// Проверим результат работы функции inet_pton()
+		// Check the result of the inet_pton() function
 		if (ret == SOCKET_ERROR)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("inet_pton() failed! Error code %d: ", WSAGetLastError());
 
-			// Выбрасываем исключение
+			// Raise the server exception
 			throw server_exception("Failed to convert server IP address into its numeric binary form (inet_pton() error).");
 		}
 
-		// Получим свободного рабочего
+		// Get a free worker
 		worker& w = get_min_worker();
 
-		// Запускаем процесс приема входящих соединений
+		// Start the process of accepting incoming connections
 		m_listener = evconnlistener_new_bind(
 			w.evbase,
 			[](evconnlistener* listener, evutil_socket_t fd,
@@ -614,19 +612,19 @@ namespace pkodev
 			{
 				try
 				{
-					// Вызываем событие приема входящих соединений
+					// Accept the incoming connection
 					bool ret = reinterpret_cast<Server*>(ctx)->handle_accept(fd, address);
 
-					// Проверим результат
+					// Check the result
 					if (ret == false)
 					{
-						// Закрываем соединение
+						// Close the connection
 						evutil_closesocket(fd);
 					}
 				}
 				catch (...)
 				{
-					// Ошибка, закрываем соединение
+					// Error, close the connection
 					evutil_closesocket(fd);
 				}
 			},
@@ -637,202 +635,200 @@ namespace pkodev
 			sizeof(local)
 		);
 
-		
-
-		// Проверим, что процесс прослушивания запущен
+		// Check that the listening process is running
 		if (m_listener == nullptr)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("evconnlistener_new_bind() failed! Is the port already in use?");
 
-			// Ошибка
+			// Raise the server exception
 			throw server_exception(
 				std::string("Failed to start listening on address (" + m_cfg.game_host
 					+ ":" + std::to_string(m_cfg.game_port) + ")! Is the port already in use?")
 			);
 		}
 
-		// Увеличим число событий у рабочего
+		// Increase the number of tasks for the worker
 		++w.event_count;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Ready to accept incoming connections!");
 	}
 
-	// Остановить прослушивание входящих соединений
+	// Stop listen for incoming connections
 	void Server::destroy_listener()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Stop receiving incoming connections . . .");
 
-		// Удаляем объект для прослушивания входящих соединений
+		// Stop listen
 		evconnlistener_free(m_listener); 
 		m_listener = nullptr;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Receiving incoming connections stopped!");
 	}
 
-	// Запустить сервер
+	// Start the server
 	void Server::run()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Server starts . . .");
 
-		// Проверим, что сервер запущен
+		// Check if the server is already running
 		if (m_running == true)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Error, the server is already running!");
 
-			// Сервер уже запущен
+			// Raise the server exception
 			throw server_exception("Server is already running!");
 		}
 
-		// Запускаем сервер
+		// Starting the server . . .
 		try
 		{
-			// Цикл по списку инициализации
+			// Loop through the server initialization list
 			for (auto it = m_inits.begin(); it != m_inits.end(); ++it)
 			{
-				// Выполняем инициализацию
+				// Perform initialization
 				it->init();
 
-				// Поднимаем флаг
+				// Raise the initialization flag
 				it->initialized = true;
 			}
 		}
 		catch (const std::exception& e)
 		{
-			// Откатываем изменения
+			// Rollback initialization . . .
 			for (auto it = m_inits.rbegin(); it != m_inits.rend(); ++it)
 			{
-				// Проверим, что флаг инициализации поднят
+				// Check that the initialization flag is raised
 				if (it->initialized == true)
 				{
-					// Освобождаем ресурсы
+					// Free up resources
 					it->destroy();
 
-					// Сбрасываем флаг
+					// Reset the flag
 					it->initialized = false;
 				}
 			}
 
-			// Пробрасываем исключение далее
+			// Raise the server exception
 			throw server_exception(e.what());
 		}
 
-		// Сервер запущен
+		// The server is started
 		m_running = true;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Server started!");
 	}
 
-	// Остановить сервер
+	// Stop the server
 	void Server::stop()
 	{
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("Stopping server . . .");
 
-		// Проверим, что сервер запущен
+		// Check if the server is running
 		if (m_running == false)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Error, the server is already stopped!");
 
-			// Сервер уже остановлен
+			// The server is already stopped
 			return;
 		}
 
-		// Освобождаем ресурсы
+		// Free resources
 		for (auto it = m_inits.rbegin(); it != m_inits.rend(); ++it)
 		{
-			// Проверим, что флаг инициализации поднят
+			// Check that the initialization flag is raised
 			if (it->initialized == true)
 			{
-				// Освобождаем ресурсы
+				// Free up resources
 				it->destroy();
 
-				// Сбрасываем флаг
+				// Reset the flag
 				it->initialized = false;
 			}
 		}
 
-		// Сервер остановлен
+		// The server is stopped
 		m_running = false;
 
-		// Напишем лог
+		// Write a log
 		Logger::Instance().log("The server stopped!");
 	}
 	
 
-	// Принять входящее соединение
+	// Accept incoming connection
 	bool Server::handle_accept(evutil_socket_t fd, sockaddr* address)
 	{
-		// Обрабатываем входящее соединение
+		// Handling an incoming connection
 		try
 		{
-			// Проверим, что на сервере есть место
+			// Check if there are free slots on the server
 			if (m_bridge_pool->is_empty() == true)
 			{
-				// На сервере не осталось свободных слотов
+				// There are no free slots left on the server
 				return false;
 			}
 
-			// Получим IP-адрес и порт
+			// Get the IP address and port of the client
 			std::string ip_address = utils::network::get_ip_address(address);
 			unsigned short int port = utils::network::get_port(address);
 
-			// Проверим IP-адрес и порт клиента
+			// Check the IP address and port of the client
 			if ( (ip_address.empty() == true) || (port == 0) )
 			{
-				// Некорректный адрес клиента
+				// Invalid client address
 				return false;
 			}
 
-			// Проверим, что не превышен лимит подключений с одного IP-адреса
+			// Check that the limit of connections from one IP address has not been exceeded
 			if ( (m_cfg.max_clients_per_ip != 0) &&
 					(m_ip_book.get_ip_count(ip_address) >= m_cfg.max_clients_per_ip) )
 			{
-				// Превышен лимит подключений с одного IP-адреса
+				// Connection limit from one IP address exceeded
 				return false;
 			}
 
-			// Проверим время подключения с одного IP-адреса
+			// Check connection time from one IP address
 			if ( (m_cfg.connection_interval != 0) &&
 					(m_ip_book.is_time_expired(ip_address, m_cfg.connection_interval) == false) )
 			{
-				// Слишком частые подключения с одного IP-адреса
+				// Too frequent connections from the same IP address
 				return false;
 			}
 
-			// Ищем рабочего, к которому можно прикрепить клиента
+			// Look for a worker to which we can attach a client
 			worker& w = get_min_worker();
 
-			// Лямбда для автоматического возвращения моста в пул при ошибке
+			// Lambda to automatically return the bridge to the pool on an error
 			auto releaser = [&](Bridge* bridge) noexcept
 			{
-				// Отлавливаем и обратаываем все исключения
+				// Catch and handle all exceptions
 				try
 				{
-					// Возвращаем мост в пул
+					// Return the bridge to the pool
 					m_bridge_pool->release(bridge);
 				}
 				catch (...)
 				{
-					// Поймали исключение
+					// Write a log
 					Logger::Instance().log("Caught an exception in bridge releaser on client accept!");
 				}
 			};
 			
-			// Берем мост из пула
+			// Take a bridge from the pool
 			std::unique_ptr<Bridge, decltype(releaser)> bridge_ptr(
 				dynamic_cast<Bridge*>(m_bridge_pool->acquire()), 
 				releaser
 			);
 
-			// Связываем сетевой мост с Game.exe и устанавливаем адрес GateServer.exe
+			// Associate the network bridge with Game.exe (client) and set the address of GateServer.exe
 			bridge_ptr->build(
 				w,
 				fd,
@@ -840,53 +836,53 @@ namespace pkodev
 				{ m_cfg.gate_host, m_cfg.gate_port }
 			);
 
-			// Запускаем подключение к GateServer.exe
+			// Start connection to GateServer.exe
 			bridge_ptr->connect();
 			
-			// Мост создан, добавляем его в список мостов
+			// The bridge is created, add it to the list of bridges
 			add_bridge(bridge_ptr.release());
 
-			// Увеличиваем счетчик задач
+			// Increase the task counter for the current worker
 			++w.event_count;
 
-			// Соединение успешно принято
+			// Connection successfully accepted
 			return true;
 		}
 		catch (const bridge_exception& e)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Exception 'bridge_exception' is occurred on client accept: %s", e.what());
 		}
 		catch (const object_pool_exception& e)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Exception 'object_pool_exception' is occurred on client accept: %s", e.what());
 		}
 		catch (const std::exception& e)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Exception 'std::exception' is occurred on client accept: %s", e.what());
 		}
 		catch (...)
 		{
-			// Напишем лог
+			// Write a log
 			Logger::Instance().log("Exception '...' is occurred on client accept");
 		}
 
-		// Произошла ошибка
+		// An error has occurred while accepting the connection
 		return false;
 	}
 
-	// Найти рабочего с наименьшим числом событий
+	// Find the worker with the least number of tasks
 	Server::worker& Server::get_min_worker()
 	{
-		// Указатель на первый элемент в списке рабочих
+		// Pointer to the first element in the list of workers
 		auto min_it = m_workers.begin();
 
-		// Ищем рабочего с наименьшим числом событий
+		// Looking for the worker with the least number of tasks
 		for (auto it = (min_it + 1); it != m_workers.end(); ++it)
 		{
-			// Сравниваем число событий
+			// Compare the number of tasks
 			if (it->event_count.load() < min_it->event_count.load())
 			{
 				min_it = it;
@@ -896,40 +892,40 @@ namespace pkodev
 		return *min_it;
 	}
 
-	// Процедура, которую выполняет рабочий
+	// The worker's procedure
 	void Server::work()
 	{
-		// Ждем, пока запустятся все рабочие потоки
+		// Wait until all worker threads start
 		while (m_workers_ready == false)
 		{
-			// Проверим, что необходимо остановить все рабочие потоки
+			// Check that all worker threads need to be stopped
 			if (m_workers_stop == true)
 			{
-				// Выходим из процедуры
+				// Exit the procedure
 				return;
 			}
 
-			// Ожидаем 10 мс
+			// Waiting for 10ms
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 
-		// Получим ID текущего потока
+		// Get the ID of the current thread
 		std::thread::id this_id = std::this_thread::get_id();
 
-		// Ищем рабочего, которые принадлежит данному потоку
+		// Look for a worker that belongs to this thread
 		worker* w = nullptr;
 		for (auto it = m_workers.begin(); it != m_workers.end(); ++it)
 		{
-			// Сравниваем ID потоков . . .
+			// Compare thread IDs
 			if ( it->th.get_id() == this_id )
 			{
-				// Рабочий найден
+				// Worker found
 				w = &(*it);
 				break;
 			}
 		}
 
-		// Выполняем цикл событий
+		// Execute the event loop
 		if ( w != nullptr )
 		{
 			while (event_base_got_break(w->evbase) == false)
@@ -940,46 +936,46 @@ namespace pkodev
 		}
 	}
 
-	// Добавить мост в список
+	// Add a network bridge to the list
 	void Server::add_bridge(Bridge* bridge)
 	{
-		// Добавляем мост в список
+		// Add a bridge to the list
 		bool ret = m_connected_bridges.add(bridge);
 
-		// Проверим результат
+		// Check the result
 		if (ret == true)
 		{
-			// Добавляем IP-адрес клиента в список адресов
+			// Add client IP address to address list
 			m_ip_book.register_ip(bridge->game_address().ip);
 		}
 		else
 		{
-			// Не удалось добавить мост в список?
+			// Failed to add the bridge to the list?
 			Logger::Instance().log("Server::add_bridge(): Failed to add a bridge to the list!");
 		}
 	}
 
-	// Удалить мост из списка
+	// Remove a network bridge from the list
 	void Server::remove_bridge(Bridge* bridge)
 	{
-		// Удаляем мост из списка
+		// Remove a bridge from the list
 		bool ret = m_connected_bridges.remove(bridge);
 
-		// Проверим результат
+		// Check the result
 		if (ret == true)
 		{
-			// Удаляем IP-адрес из списка
+			// Remove an IP address from the list
 			m_ip_book.unregister_ip(
 				bridge->game_address().ip,
 				m_cfg.connection_interval
 			);
 
-			// Возвращаем мост в пул
+			// Return the bridge to the pool
 			m_bridge_pool->release(bridge);
 		}
 		else
 		{
-			// Мост не найден в списке?
+			// Failed to remove the bridge from the list?
 			Logger::Instance().log("Server::remove_bridge(): Bridge is not found in the list!");
 		}
 	}

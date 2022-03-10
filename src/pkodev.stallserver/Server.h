@@ -18,51 +18,51 @@
 
 namespace pkodev
 {
-	// Определим тип сетевого моста
+	// Define some useful classes
 	class Bridge;
 	class BridgeList;
 
-	// Определим тип списка карт, на которых работает система оффлайн ларьков
+	// Define the type of the list of maps on which the system of offline stalls works
 	typedef std::vector<std::string> map_list_t;
 
-	// Исключение для класса сервера
+	// Stall server exception
 	class server_exception final : public std::runtime_error
 	{
 		public:
 
-			// Конструктор с const char *
+			// Constructor for const char *
 			server_exception(const char* what) :
 				std::runtime_error(what) { }
 
-			// Конструктор с std::string
+			// Constructor for std::string
 			server_exception(const std::string& what) :
 				std::runtime_error(what) { }
 	};
 
-	// Структура с настройками сервера
+	// Structure with the server settings
 	struct settings_t final
 	{
-		// Настройки подключения к StallServer.exe
-		std::string game_host;                  // Адрес Game.exe -> StallServer.exe
-		unsigned short int game_port;           // Порт  Game.exe -> StallServer.exe
-		unsigned short int max_player;          // Максимальное число клиентов, которые одновременно могут подключиться к серверу
-		unsigned short int max_clients_per_ip;  // Максимальное число клиентов с одинаковым IP-адресом
-		unsigned int connection_interval;       // Интервал времени между подключениями с одного IP-адреса
+		// Connection settings for StallServer.exe
+		std::string game_host;                  // Address Game.exe -> StallServer.exe
+		unsigned short int game_port;           // Port  Game.exe -> StallServer.exe
+		unsigned short int max_player;          // The maximum number of clients that can simultaneously connect to the server
+		unsigned short int max_clients_per_ip;  // Maximum number of clients with the same IP address
+		unsigned int connection_interval;       // Time interval between connections from the same IP address
 
-		// Настройки подключения к GateServer.exe
-		std::string gate_host;         // Адрес StallServer.exe -> GateServer.exe
-		unsigned short int gate_port;  // Порт  StallServer.exe -> GateServer.exe
+		// Connection settings for GateServer.exe
+		std::string gate_host;         // Address StallServer.exe -> GateServer.exe
+		unsigned short int gate_port;  // Port  StallServer.exe -> GateServer.exe
 
-		// Список карт, на которых работает система оффлайн ларьков
+		// The list of maps on which the system of offline stalls works
 		map_list_t maps;
 
-		// Максимальное число ларьков с 1 IP-адреса
+		// Maximum number of stalls from 1 IP address
 		unsigned short int max_stalls_per_ip;
 
-		// Максимальное время торговли в оффлайн ларьке в секундах
+		// Maximum trading time in an offline stall (in seconds)
 		unsigned int max_offline_time;
 
-		// Конструктор
+		// Constructor
 		settings_t() :
 			game_host(""), game_port(0), max_player(0), 
 			max_clients_per_ip(0), connection_interval(0),
@@ -73,45 +73,45 @@ namespace pkodev
 		}
 	};
 
-	// Класс сервера
+	// Server class
 	class Server final
 	{
 		public:
 
-			// Конструктор
+			// Constructor
 			Server(const settings_t& settings_);
 
-			// Конструктор копирования
+			// Copy constructor
 			Server(const Server&) = delete;
 
-			// Конструктор перемещения
+			// Move constructor
 			Server(Server&&) = delete;
 
-			// Деструктор
+			// Destructor
 			~Server();
 
-			// Оператор присваивания копированием
+			// Copy assigment operator
 			Server& operator=(const Server&) = delete;
 
-			// Оператор присваивания перемещением
+			// Move assigment operator
 			Server& operator=(Server&&) = delete;
 
-			// Запустить сервер
+			// Start the server
 			void run();
 
-			// Остановить сервер
+			// Stop the server
 			void stop();
 
-			// Получить ссылку на настройки
+			// Get a reference to the server settings structure
 			inline const settings_t& settings() const { return m_cfg; }
 
-			// Запущен ли сервер
+			// Is the server running?
 			inline bool is_running() const { return m_running; }
 
-			// Получить список мостов
+			// Get a list of network bridges
 			inline BridgeList& bridges() { return m_connected_bridges; }
 
-			// Получить список мостов в режиме оффлайн ларька
+			// Get a list of network bridges in offline stall mode
 			inline BridgeList& offline_bridges() { return m_offline_stall_bridges; }
 
 
@@ -119,44 +119,44 @@ namespace pkodev
 
 			friend class Bridge;
 
-			// Структура инициализатора
+			// Server initializer structure
 			struct initializer final
 			{
-				// Инициализация
+				// Initialization function
 				std::function<void()> init;
 
-				// Освобождение ресурсов
+				// Resource release function
 				std::function<void()> destroy;
 
-				// Флаг инициализации
+				// Initialization flag
 				bool initialized;
 
-				// Конструктор
+				// Constructor
 				initializer(std::function<void()> init_, std::function<void()> destroy_);
 
-				// Перемещающий конструктор
+				// Copy constructor
 				initializer(initializer&& other) noexcept;
 
-				// Копирующий конструктор
+				// Move constructor
 				initializer(const initializer& other);
 			};
 
-			// Структура рабочего
+			// Server worker structure
 			struct worker final
 			{
-				// Флаг вывода списка обработчиков
+				// Packet handlers list output flag
 				static bool handlers_log;
 
-				// Ядро событий
+				// Event base
 				event_base* evbase;
 
-				// Поток
+				// Thread descriptor
 				std::thread th;
 
-				// Число задач
+				// Number of tasks
 				std::atomic_int event_count;
 
-				// Обработчики пакетов
+				// Packet handlers
 				std::shared_ptr<PacketHandlerStorage> handlers;
 
 				// A lock for output and disconnection operations
@@ -166,91 +166,88 @@ namespace pkodev
 				std::shared_ptr<std::recursive_mutex> data_lock;
 
 
-				// Конструктор
+				// Constructor
 				worker(event_base* base, std::thread&& th);
 
-				// Перемещающий конструктор
+				// Move constructor
 				worker(worker&& other) noexcept;
 
-				// Копирующий конструктор
+				// Copy constructor
 				worker(const worker& other) = delete;
 			};
 
 
-			// Первичное и конечное освобождение ресурсов
+			// Initial and final release of resources
 			void initial_cleanup();
 			void final_cleanup();
 
-			// Загрузить библиотеку WinSock
+			// Load WinSock library
 			void init_winsock();
 			void destroy_winsock();
 			
-			// Выделение памяти под клиенты
+			// Memory allocation for clients
 			void init_bridge_pool();
 			void destroy_bridge_pool();
 
-			// Инициализация рабочих потоков
+			// Initialization of worker threads
 			void init_workers();
 			void destroy_workers();
 
-			// Инициализация прослушивания входящих соединений
+			// Initialize listening for incoming connections
 			void init_listener();
 			void destroy_listener();
 
 
-			// Принять входящее соединение
+			// Accept incoming connection
 			bool handle_accept(evutil_socket_t fd, sockaddr* address);
 
-			// Процедура, которую выполняет рабочий
+			// The worker's procedure
 			void work();
 
-			// Найти рабочего с наименьшим числом событий
+			// Find the worker with the least number of tasks
 			worker& get_min_worker();
 
-			// Добавить мост в список
+			// Add a network bridge to the list
 			void add_bridge(Bridge* bridge);
 
-			// Удалить мост из списка
+			// Remove a network bridge from the list
 			void remove_bridge(Bridge* bridge);
 
 
-			// Счетчик экземпляров класса
+			// Class instance counter
 			static std::size_t instance_counter;
 
-
-			// Список инициализаторов
+			// List of initializers
 			std::vector<initializer> m_inits;
 
-
-			// Ссылка на настройки
+			// Reference to the structure with server settings
 			const settings_t& m_cfg;
 			
-
-			// Запущен ли сервер
+			// Is the server running?
 			bool m_running;
 
-			// Список рабочих потоков
+			// List of worker threads
 			std::vector<worker> m_workers;
 
-			// Запущены ли все рабочие потоки
+			// Are all worker threads running?
 			std::atomic<bool> m_workers_ready;
 
-			// Нужно ли остановить рабочие потоки
+			// Should worker threads be stopped?
 			std::atomic<bool> m_workers_stop;
 
-			// Объект для прослушивания входящих соединений
+			// Object for listening to incoming connections
 			evconnlistener* m_listener;
 
-			// Пул сетевых мостов
+			// Network bridge object pool
 			std::unique_ptr<CObjectPool> m_bridge_pool;
 
-			// Список всех подключенных мостов
+			// List of all connected network bridges
 			BridgeList m_connected_bridges;
 
-			// Список мостов, которые находятся в режиме оффлайн ларька
+			// List of network bridges that are in offline stall mode
 			BridgeList m_offline_stall_bridges;
 
-			// Список подключенных IP адресов
+			// List of connected IP addresses
 			IpAddressBook m_ip_book;
 	};
 }

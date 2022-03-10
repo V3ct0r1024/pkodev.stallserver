@@ -43,10 +43,10 @@ namespace pkodev
 			public:
 
 				// Convert string to lowercase
-				static std::string lower_case(const std::string& str);
+				static std::string lower_case(std::string str);
 
 				// Convert string to uppercase
-				static std::string upper_case(const std::string& str);
+				static std::string upper_case(std::string str);
 
 				// Remove leading whitespace from a string
 				static std::string left_trim(const std::string& str, const std::string& whitespace = " \t");
