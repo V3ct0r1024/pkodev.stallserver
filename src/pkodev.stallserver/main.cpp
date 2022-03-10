@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
             std::cout << "Unknown command!" << std::endl;
         }
 
-        // Print a message that the server is running now
+        // Print a message that the server is stopping
         std::cout << "The server is being stopped . . ." << std::endl;
     }
     catch (const pkodev::server_exception& e)
@@ -136,6 +136,9 @@ int main(int argc, char *argv[])
     {
         std::cout << "Unknown server error!" << std::endl;
     }
+
+    // Print a message that server has been stopped!
+    std::cout << "The server has been stopped!" << std::endl;
 
     return 0;
 }

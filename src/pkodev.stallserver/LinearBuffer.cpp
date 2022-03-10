@@ -32,7 +32,7 @@ namespace pkodev
 		// Check the write position
 		if (can_write_bytes(length) == false)
 		{
-			throw linear_buffer_exception("LinearBuffer::write(): Not enough space for writing operation!");
+			throw linear_buffer_exception("LinearBuffer::write(): Not enough space or zero bytes requested for writing operation!");
 		}
 
 		// Write data to the buffer
@@ -72,13 +72,17 @@ namespace pkodev
 	void LinearBuffer::write_string(const string_t& string)
 	{
 		// Calculate the length of the string, taking into account the null character
-		std::size_t length = string.length() + 1;
+		const uint16_t length = static_cast<uint16_t>(string.length()) + 1;
+
+		// Check the length of the string
+		if (length > 512)
+		{
+			// Throw an exception
+			throw linear_buffer_exception("LinearBuffer::write_string(): Incorrect string length!");
+		}
 
 		// Write the string as an array of bytes
-		write_bytearray(
-			reinterpret_cast<const ubyte_t *>(string.c_str()), 
-			static_cast<uint16_t>(string.length() + 1)
-		);
+		write_bytearray(reinterpret_cast<const ubyte_t *>(string.c_str()), length);
 	}
 
 	// Write operation for byte array
@@ -97,7 +101,7 @@ namespace pkodev
 		// Check the read position
 		if (can_read_bytes(length) == false)
 		{
-			throw linear_buffer_exception("LinearBuffer::read(): Not enough space for reading operation!");
+			throw linear_buffer_exception("LinearBuffer::read(): Not enough bytes or zero bytes requested for reading operation!");
 		}
 
 		// Write data to the destination buffer
@@ -147,18 +151,32 @@ namespace pkodev
 	string_t LinearBuffer::read_string()
 	{
 		// Read the length of the string
-		uint16_t length = read_uint16();
+		const uint16_t length = read_uint16();
+
+		// Check the length
+		if (length < 1 || length > 512)
+		{
+			// Roll back the read operation of the string
+			m_read_pos -= sizeof(length);
+
+			// Throw an exception
+			throw linear_buffer_exception("LinearBuffer::read_string(): Incorrect string length!");
+		}
 
 		// Check that the buffer has the required number of bytes
 		if (can_read_bytes(static_cast<std::size_t>(length)) == false)
 		{
-			throw linear_buffer_exception("LinearBuffer::read_string(): Not enough space in the buffer for reading operation!");
+			// Roll back the read operation of the string
+			m_read_pos -= sizeof(length);
+
+			// Throw an exception
+			throw linear_buffer_exception("LinearBuffer::read_string(): Not enough bytes or zero bytes requested for reading operation!");
 		}
 
-		// Create a string
-		string_t string("");
+		// Create an empty string
+		string_t string{ "" };
 
-		// Allocate memory for the string
+		// Allocate some memory for the string
 		string.reserve(length);
 
 		// Copy the bytes from the buffer to the string
@@ -178,7 +196,7 @@ namespace pkodev
 	uint16_t LinearBuffer::read_bytearray(ubyte_t* dst, std::size_t size)
 	{
 		// Read the size of the array
-		uint16_t length = read_uint16();
+		const uint16_t length = read_uint16();
 
 		// Check that the size of the array does not exceed the size of the buffer
 		if (length <= size)
@@ -195,7 +213,7 @@ namespace pkodev
 			throw linear_buffer_exception("LinearBuffer::read_bytearray(): Destination buffer is smaller than byte array!");
 		}
 
-		// Return the read array size
+		// Return the byte array size
 		return length;
 	}
 
@@ -235,11 +253,14 @@ namespace pkodev
 			// Relative to the current position
 			case seek_type::current:
 				{
+					// The new position
+					const std::size_t new_pos = (m_read_pos + index);
+
 					// Check the new position
-					if (can_read_bytes(index) == true)
+					if (new_pos < m_size)
 					{
 						// Set the new read position
-						m_read_pos += index;
+						m_read_pos = new_pos;
 						return;
 					}
 				}
@@ -285,11 +306,14 @@ namespace pkodev
 			// Relative to the current position
 			case seek_type::current:
 				{
+					// The new position
+					const std::size_t new_pos = (m_write_pos + index);
+
 					// Check the new position
-					if (can_write_bytes(index) == false)
+					if (new_pos < m_size)
 					{
 						// Set the new write position
-						m_write_pos += index;
+						m_write_pos = new_pos;
 						return;
 					}
 				}
@@ -316,13 +340,13 @@ namespace pkodev
 	// Check that there are 'length' bytes in the buffer to write
 	bool LinearBuffer::can_write_bytes(std::size_t length) const
 	{
-		return ((m_write_pos + length) <= m_size);
+		return (length != 0 && (m_write_pos + length) < m_size);
 	}
 
 	// Check that there are 'length' bytes in the buffer to read
 	bool LinearBuffer::can_read_bytes(std::size_t length) const
 	{
-		return ((m_read_pos + length) <= m_size);
+		return (length != 0 && (m_read_pos + length) < m_size);
 	}
 
 	// Clear buffer

@@ -141,6 +141,13 @@ namespace pkodev
 	{
 		// Calculate the length of the string, taking into account the null character
 		std::size_t length = string.length() + 1;
+
+		// Check the length
+		if (length > 512)
+		{
+			// Throw an exception
+			throw ring_buffer_exception("RingBuffer::write_string(): Incorrect string length!");
+		}
 		
 		// Write the string length
 		write_uint16(static_cast<uint16_t>(length));
@@ -228,16 +235,24 @@ namespace pkodev
 		// Read the length of the string
 		std::size_t length = static_cast<std::size_t>(read_uint16());
 
+		// Check the length
+		if (length < 1 || length > 512)
+		{
+			// Throw an exception
+			throw ring_buffer_exception("RingBuffer::read_string(): Incorrect string length!");
+		}
+
 		// Check that the buffer has the required number of bytes
 		if (get_readable_length() < length)
 		{
+			// Throw an exception
 			throw ring_buffer_exception(
 				"RingBuffer::read_string(): Not enough space in the buffer for reading operation!"
 			);
 		}
 
 		// Create a string
-		string_t string("");
+		string_t string{ "" };
 
 		// Allocate memory for the string
 		string.reserve(length);

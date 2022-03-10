@@ -141,9 +141,6 @@ namespace pkodev
 		// Login packet
 		LoginPacket login_packet;
 
-		// Mutex
-		std::shared_ptr<std::recursive_mutex> lock;
-
 		// Constructor
 		player_data() :
 			authed(false),
@@ -231,9 +228,6 @@ namespace pkodev
 
 		private:
 
-			// Friend class
-			friend class BridgeWrapper;
-
 			// Data for exchange with the network bridge side
 			struct endpoint final
 			{
@@ -319,9 +313,6 @@ namespace pkodev
 
 			// Game logic related data
 			player_data m_player_data;
-
-			// Output mutex
-			std::shared_ptr<std::recursive_mutex> m_out_lock;
 	};
 
 	// Network bridge class creator

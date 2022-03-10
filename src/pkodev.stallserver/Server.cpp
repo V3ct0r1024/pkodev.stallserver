@@ -275,12 +275,12 @@ namespace pkodev
 					std::bind(std::mem_fn(&Server::destroy_winsock), this)
 				}
 			);
-
+			
 			// Memory allocation for clients
 			m_inits.push_back(
 				{
 					std::bind(std::mem_fn(&Server::init_bridge_pool), this),
-					std::bind(std::mem_fn(&Server::destroy_bridge_pool), this)
+					_nop
 				}
 			);
 
@@ -289,6 +289,14 @@ namespace pkodev
 				{
 					std::bind(std::mem_fn(&Server::init_workers), this),
 					std::bind(std::mem_fn(&Server::destroy_workers), this)
+				}
+			);
+
+			// Memory allocation for clients
+			m_inits.push_back(
+				{
+					_nop,
+					std::bind(std::mem_fn(&Server::destroy_bridge_pool), this)
 				}
 			);
 
@@ -451,7 +459,10 @@ namespace pkodev
 			}
 		);
 
-		// Delete the pool
+		// Clear the list of connected network bridges
+		m_connected_bridges.clear();
+
+		// Delete the bridges pool
 		m_bridge_pool.reset();
 
 		// Write a log

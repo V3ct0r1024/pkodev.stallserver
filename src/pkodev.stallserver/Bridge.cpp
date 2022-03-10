@@ -95,9 +95,6 @@ namespace pkodev
 			m_auth_timer->on_timer(
 				[&]()
 				{
-					// Lock player's data
-					std::lock_guard<std::recursive_mutex> lock(*m_player_data.lock);
-
 					// Check that a player is authorized
 					if (m_player_data.authed == false)
 					{
@@ -122,10 +119,6 @@ namespace pkodev
 				}
 			);
 		}
-
-		// Save poiners to mutexes
-		m_out_lock = w.out_lock;
-		m_player_data.lock = w.data_lock;
 	}
 
 	// Remove a network bridge
@@ -145,10 +138,6 @@ namespace pkodev
 			// Reset lambda
 			auto ctx_reset = [](endpoint& ctx)
 			{
-				// Remove socket events
-				//if (ctx.read_event != nullptr) { event_free(ctx.read_event); ctx.read_event = nullptr; }
-				//if (ctx.write_event != nullptr) { event_free(ctx.write_event); ctx.write_event = nullptr; }
-
 				// Close socket
 				if (ctx.connected == true)
 				{
@@ -192,8 +181,6 @@ namespace pkodev
 
 		// Reset game logic data
 		{
-			std::lock_guard<std::recursive_mutex> lock(*m_player_data.lock);
-
 			m_player_data.authed = false;
 			m_player_data.version = 0;
 			m_player_data.offline_stall = false;
@@ -517,7 +504,7 @@ namespace pkodev
 		}
 
 		// Start the authorization timer for 2.048 seconds
-		/*bool ret = m_auth_timer->start(2048);
+		bool ret = m_auth_timer->start(2048);
 
 		// Check the result
 		if (ret == false)
@@ -526,7 +513,7 @@ namespace pkodev
 			Logger::Instance().log("Failed to start authorization timer after establishing connection with the server!");
 			return false;
 		}
-		*/
+		
 		// Connected to GateServer.exe
 		m_server_ctx.connected = true;
 
@@ -715,12 +702,6 @@ namespace pkodev
 						return false;
 					}
 
-					if (from.type == endpoint_type_t::game)
-					{
-							std::cout << "packet_id: " << packet_id << std::endl;
-					}
-						
-
 					// Check that the packet exists in the list of handlers
 					if (m_handlers->check_handler(packet_id) == true)
 					{
@@ -733,13 +714,8 @@ namespace pkodev
 						// Validate the packet
 						if (handler->validate() == true)
 						{
-							{
-								// Lock player's data
-								std::lock_guard<std::recursive_mutex> lock(*m_player_data.lock);
-
-								// Proccess the packet
-								pass = handler->handle(*(this));
-							}
+							// Proccess the packet
+							pass = handler->handle(*(this));
 						}
 						else
 						{
@@ -765,9 +741,6 @@ namespace pkodev
 				}
 
 				{
-					// Lock output buffers
-					std::lock_guard<std::recursive_mutex> lock(*m_out_lock);
-
 					// Check the other side is connected
 					if (to.connected == true)
 					{
@@ -825,9 +798,6 @@ namespace pkodev
 			}
 
 			{
-				// Lock output buffers
-				std::lock_guard<std::recursive_mutex> lock(*m_out_lock);
-
 				// Send the data to the other side
 				if (to.connected == true)
 				{
@@ -913,9 +883,6 @@ namespace pkodev
 	// Socket write event
 	bool Bridge::on_write(endpoint& to, endpoint& from)
 	{
-		// Lock output buffers
-		std::lock_guard<std::recursive_mutex> lock(*m_out_lock);
-
 		// Write the data from output buffer to socket
 		try
 		{
@@ -1042,9 +1009,6 @@ namespace pkodev
 			// Reset connection flag
 			ctx.connected = false;
 		};
-
-		// Lock output buffers
-		std::lock_guard<std::recursive_mutex> lock(*m_out_lock);
 
 		// Check remote side type (GateServer.exe or Game.exe)
 		switch (side)
@@ -1173,9 +1137,6 @@ namespace pkodev
 	// Send a packet to the network bridge side
 	bool Bridge::send_packet(endpoint& ctx, const IPacket& packet)
 	{
-		// Lock output buffers
-		std::lock_guard<std::recursive_mutex> lock(*m_out_lock);
-
 		// Check that the socket is disconnected
 		if (ctx.connected == false)
 		{
@@ -1212,7 +1173,7 @@ namespace pkodev
 				// Write a message to log
 				Logger::Instance().log(
 					"Can't write a packet (ID: %d) into output network buffer: "
-						"Not enough free space in the output network buffer for packet (%d bytes)",
+						"Not enough free space in the output network buffer for packet (%d bytes) ",
 					packet.id(),
 					packet_size
 				);
