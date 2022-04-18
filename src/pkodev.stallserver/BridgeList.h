@@ -1,7 +1,7 @@
 #pragma once
 #include "Packet.h"
 
-#include <vector>
+#include <set>
 #include <mutex>
 #include <functional>
 #include <optional>
@@ -15,7 +15,7 @@ namespace pkodev
 	enum class endpoint_type_t : unsigned short int;
 
 	// Determine the storage type for network bridges
-	typedef std::vector<Bridge*> bridge_list_t;
+	typedef std::set<Bridge*> bridge_list_t;
 
 	// List of network bridges
 	class BridgeList final
@@ -41,10 +41,10 @@ namespace pkodev
 			BridgeList& operator=(BridgeList&&) = delete;
 
 			// Add a network bridge to the list
-			bool add(Bridge* bridge);
+			bool add(const Bridge* bridge);
 
 			// Remove a network bridge from the list
-			bool remove(Bridge* bridge);
+			bool remove(const Bridge* bridge);
 
 			// Clear the network bridges list
 			void clear();
@@ -53,22 +53,22 @@ namespace pkodev
 			std::size_t count() const;
 
 			// Check that a network bridge exists in the list
-			bool exists(Bridge* bridge) const;
+			bool exists(const Bridge* bridge) const;
 
 			// Execute a custom function over each network bridge in the list
-			void for_each(std::function<void(Bridge&, bool&)> func);
+			void for_each(std::function<bool(Bridge&)> func);
 
 			// Send a packet to all network bridges in the list
-			void send_to_all(const IPacket& packet, endpoint_type_t direction) const;
+			void send_to_all(const IPacket& packet, endpoint_type_t direction);
 
 			// Find a network bridge by user condition
-			std::optional<Bridge*> find(std::function<bool(Bridge&)> condition);
+			std::optional<Bridge*> find(std::function<bool(const Bridge&)> condition) const;
 
 			// Find a network bridge by account
-			std::optional<Bridge*> find_by_account(const std::string& account);
+			std::optional<Bridge*> find_by_account(const std::string& account) const;
 
 			// Find a network bridge by character
-			std::optional<Bridge*> find_by_character(const std::string& character);
+			std::optional<Bridge*> find_by_character(const std::string& character) const;
 
 		private:
 

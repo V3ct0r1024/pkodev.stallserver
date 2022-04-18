@@ -6,7 +6,6 @@
 
 #include "SystemNoticePacket.h"
 
-
 namespace pkodev
 {
 	// Constructor of a data structure for network exchange with the network bridge side
@@ -95,11 +94,14 @@ namespace pkodev
 			m_auth_timer->on_timer(
 				[&]()
 				{
+					// Lock the bridge
+					std::lock_guard<std::recursive_mutex> lock(m_mtx);
+
 					// Check that a player is authorized
 					if (m_player_data.authed == false)
 					{
 						// Kick the player from the server
-						on_disconnect(endpoint_type_t::gate);
+						//on_disconnect(endpoint_type_t::gate);
 					}
 				}
 			);
@@ -114,6 +116,9 @@ namespace pkodev
 			m_trade_timer->on_timer(
 				[&]() 
 				{ 
+					// Lock the bridge
+					std::lock_guard<std::recursive_mutex> lock(m_mtx);
+
 					// Kick the player from the server
 					on_disconnect(endpoint_type_t::gate);
 				}
@@ -263,6 +268,9 @@ namespace pkodev
 				// Reference to the network bridge
 				Bridge& bridge = *reinterpret_cast<Bridge*>(ctx);
 
+				// Lock the bridge
+				std::lock_guard<std::recursive_mutex> lock(bridge.m_mtx);
+
 				// References to client and server data structures
 				endpoint& client = bridge.m_client_ctx;
 				endpoint& server = bridge.m_server_ctx;
@@ -310,6 +318,9 @@ namespace pkodev
 			{
 				// Reference to the network bridge
 				Bridge& bridge = *reinterpret_cast<Bridge*>(ctx);
+
+				// Lock the bridge
+				std::lock_guard<std::recursive_mutex> lock(bridge.m_mtx);
 
 				// References to client and server data structures
 				endpoint& client = bridge.m_client_ctx;
@@ -1095,11 +1106,11 @@ namespace pkodev
 					if (m_player_data.reconnecting == true)
 					{
 						// Search a bridge in the common list of network bridges by login
-						auto bridge = m_server.bridges().find(
-							[&](Bridge& bridge) -> bool
+						auto opt = m_server.bridges().find(
+							[&](const Bridge& other_bridge) -> bool
 							{
 								// Get a reference to game data of connecting player
-								const player_data& other_data = bridge.player();
+								const player_data& other_data = other_bridge.player();
 
 								// Check that the player is not authorized
 								if (other_data.authed == false)
@@ -1117,9 +1128,16 @@ namespace pkodev
 						);
 
 						// Check that the bridge is found
-						if (bridge)
+						if (opt.has_value() == true)
 						{
-							bool ret = (*bridge)->send_packet_gate( (*bridge)->player().login_packet );
+							// Get pointer to the bridge
+							Bridge* bridge = opt.value();
+
+							// Lock the bridge
+							std::lock_guard<std::recursive_mutex> lock(bridge->get_lock());
+							
+							// Send the login packet to the server
+							bridge->send_packet_gate( bridge->player().login_packet );
 						}
 					}
 				}

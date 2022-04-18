@@ -7,8 +7,7 @@ namespace pkodev
 	// Constructor
 	BridgeList::BridgeList()
 	{
-		// Reserve some memory
-		m_bridges.reserve(128);
+
 	}
 
 	// Destructor
@@ -18,61 +17,44 @@ namespace pkodev
 	}
 
 	// Add a network bridge to the list
-	bool BridgeList::add(Bridge* bridge)
+	bool BridgeList::add(const Bridge* bridge)
 	{
-		// Check pointer to the network bridge
+		// Check a network bridge pointer
 		if (bridge == nullptr)
 		{
 			return false;
 		}
 
-		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
-			
-			// Look for the network bridge in the list
-			auto it = std::find(m_bridges.begin(), m_bridges.end(), bridge);
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
 
-			// Check that the network bridge is not yet in the list
-			if (it != m_bridges.end())
-			{
-				// The network bridge already exists in the list
-				return false;
-			}
+		// Add the network bridge to the list
+		auto ret = m_bridges.insert(const_cast<Bridge*>(bridge));
 
-			// Add the network bridge to the list
-			m_bridges.push_back(bridge);
-		}
-
-		// The network bridge is added
-		return true;
+		// Return the insertion result
+		return ret.second;
 	}
 
 	// Remove a network bridge from the list
-	bool BridgeList::remove(Bridge* bridge)
+	bool BridgeList::remove(const Bridge* bridge)
 	{
-		// Check pointer to the network bridge
+		// Check a network bridge pointer
 		if (bridge == nullptr)
 		{
 			return false;
 		}
 
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
+
+		// Remove the network bridge from the list
+		std::size_t count = m_bridges.erase(const_cast<Bridge*>(bridge));
+
+		// Check that bridge has been removed
+		if (count == 0)
 		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
-
-			// Look for the network bridge in the list
-			auto it = std::find(m_bridges.begin(), m_bridges.end(), bridge);
-
-			// Check that the network bridge is exist in the list
-			if (it == m_bridges.end())
-			{
-				// The network bridge doesn't exist in the list
-				return false;
-			}
-
-			// Remove the network bridge from the list
-			m_bridges.erase(it);
+			// The bridge was not on the list
+			return false;
 		}
 
 		// The network bridge is removed
@@ -82,13 +64,11 @@ namespace pkodev
 	// Clear the network bridges list
 	void BridgeList::clear()
 	{
-		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
 
-			// Clear
-			m_bridges.clear();
-		}
+		// Clear the list
+		m_bridges.clear();
 	}
 
 	// Get a number of network bridges in the list
@@ -109,21 +89,19 @@ namespace pkodev
 	}
 
 	// Check that a network bridge exists in the list
-	bool BridgeList::exists(Bridge* bridge) const
+	bool BridgeList::exists(const Bridge* bridge) const
 	{
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
+
+		// Look for the network bridge in the list
+		auto it = std::find(m_bridges.begin(), m_bridges.end(), bridge);
+
+		// Check that the network bridge is exist in the list
+		if (it != m_bridges.end())
 		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
-
-			// Look for the network bridge in the list
-			auto it = std::find(m_bridges.begin(), m_bridges.end(), bridge);
-
-			// Check that the network bridge is exist in the list
-			if (it != m_bridges.end())
-			{
-				// The network bridge exists in the list
-				return true;
-			}
+			// The network bridge exists in the list
+			return true;
 		}
 
 		// The network bridge doesn't exist in the list
@@ -131,84 +109,85 @@ namespace pkodev
 	}
 
 	// Execute a custom function over each network bridge in the list
-	void BridgeList::for_each(std::function<void(Bridge&, bool&)> func)
+	void BridgeList::for_each(std::function<bool(Bridge&)> func)
 	{
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
+
+		// Loop stop flag
+		bool stop = false;
+
+		// Go through each element
+		for (auto bridge : m_bridges)
 		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
-
-			// Loop stop flag
-			bool stop = false;
-
-			// Go through each element
-			for (auto bridge : m_bridges)
 			{
-				// Call the function on a network bridge
-				func(*bridge, stop);
+				// Lock the current bridge
+				std::lock_guard<std::recursive_mutex> lock(bridge->get_lock());
 
-				// Check that it is necessary to stop the execution of the loop
-				if (stop == true)
-				{
-					// Exit the loop
-					break;
-				}
+				// Call the function on the network bridge
+				stop = func(*bridge);
+			}
+
+			// Check that it is necessary to stop the execution of the loop
+			if (stop == true)
+			{
+				// Exit the loop
+				break;
 			}
 		}
 	}
 
 	// Send a packet to all network bridges in the list
-	void BridgeList::send_to_all(const IPacket& packet, endpoint_type_t direction) const
+	void BridgeList::send_to_all(const IPacket& packet, endpoint_type_t direction)
 	{
-		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
-
-			// Go through each element
-			for (auto bridge : m_bridges)
+		for_each(
+			[&](Bridge& other) -> bool
 			{
 				// Determine the direction of transmission
 				switch (direction)
 				{
 					// Send the packet to the Game.exe
-					case endpoint_type_t::game:
-						{
-							bridge->send_packet_game(packet);
-						}
-						break;
+					case endpoint_type_t::game: other.send_packet_game(packet); break;
 
 					// Send the packet to the GateServer.exe
-					case endpoint_type_t::gate:
-						{
-							bridge->send_packet_gate(packet);
-						}
-						break;
+					case endpoint_type_t::gate: other.send_packet_gate(packet); break;
 				}
+
+				return false;
 			}
-		}
+		);
 	}
 
 	// Find a network bridge by user condition
-	std::optional<Bridge*> BridgeList::find(std::function<bool(Bridge&)> func)
+	std::optional<Bridge*> BridgeList::find(std::function<bool(const Bridge&)> func) const
 	{
-		{
-			// Lock the list of network bridges
-			std::lock_guard<std::mutex> lock(m_mtx);
+		// Lock the list of network bridges
+		std::lock_guard<std::mutex> lock(m_mtx);
 
-			// Look for a network bridge by user condition
-			auto it = std::find_if(m_bridges.begin(), m_bridges.end(), 
-				[&func](Bridge* bridge)
-				{
-					// Call user condition function
-					return func(*bridge);
-				}
-			);
-
-			// Check that the network bridge is found
-			if (it != m_bridges.end())
+		// Look for a network bridge by user condition
+		auto it = std::find_if(m_bridges.begin(), m_bridges.end(), 
+			[&func](const Bridge* bridge) -> bool
 			{
-				// Network bridge is found
-				return { (*it) };
+				// Is a bridge meets conditions?
+				bool ret = false;
+
+				{
+					// Lock the bridge
+					std::lock_guard<std::recursive_mutex> lock(bridge->get_lock());
+
+					// Call user condition function
+					ret = func(*bridge);
+				}
+
+				return ret;
 			}
+		);
+
+		// Check that the network bridge is found
+		if (it != m_bridges.end())
+		{
+			// Network bridge is found
+			return { (*it) };
 		}
 
 		// Bridges not found
@@ -216,10 +195,10 @@ namespace pkodev
 	}
 
 	// Find a network bridge by account
-	std::optional<Bridge*> BridgeList::find_by_account(const std::string& account)
+	std::optional<Bridge*> BridgeList::find_by_account(const std::string& account) const
 	{
 		return find(
-			[&account](Bridge& bridge) -> bool
+			[&account](const Bridge& bridge) -> bool
 			{
 				return (
 					utils::string::lower_case(bridge.player().login) 
@@ -230,10 +209,10 @@ namespace pkodev
 	}
 
 	// Find a network bridge by character
-	std::optional<Bridge*> BridgeList::find_by_character(const std::string& character)
+	std::optional<Bridge*> BridgeList::find_by_character(const std::string& character) const
 	{
 		return find(
-			[&character](Bridge& bridge) -> bool
+			[&character](const Bridge& bridge) -> bool
 			{
 				return (
 					utils::string::lower_case(bridge.player().cha_name)

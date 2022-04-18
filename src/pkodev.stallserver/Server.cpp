@@ -245,7 +245,7 @@ namespace pkodev
 		m_listener(nullptr)
 	{
 		// Check the number of instances of the class
-		if (Server::instance_counter == 0)
+		if (Server::instance_counter++ == 0)
 		{
 			// Make libevent threadsafe
 			int ret = evthread_use_windows_threads();
@@ -316,19 +316,19 @@ namespace pkodev
 				}
 			);
 		}
-
-		// Increase the class instances counter
-		Server::instance_counter++;
 	}
 
 	// Server destructor
 	Server::~Server()
 	{
 		// Stop the server
-		stop();
-
+		if (m_running == true)
+		{
+			stop();
+		}
+		
 		// Decrease the class instances counter
-		Server::instance_counter--;
+		--Server::instance_counter;
 	}
 
 	// Initial release of resources
@@ -453,9 +453,10 @@ namespace pkodev
 
 		// Return network bridges to the pool
 		m_connected_bridges.for_each(
-			[&](Bridge& bridge, bool& stop)
+			[&](Bridge& bridge)
 			{
 				m_bridge_pool->release(&bridge);
+				return false;
 			}
 		);
 
@@ -746,7 +747,7 @@ namespace pkodev
 		if (m_running == false)
 		{
 			// Write a log
-			Logger::Instance().log("Error, the server is already stopped!");
+			Logger::Instance().log("The server is already stopped!");
 
 			// The server is already stopped
 			return;

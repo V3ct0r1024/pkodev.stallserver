@@ -218,6 +218,7 @@ namespace pkodev
 
 			// Get a reference to the player's data
 			inline player_data& player() { return m_player_data; }
+			inline const player_data& player() const { return m_player_data; }
 
 			// Update packet encryption keys
 			void update_encrypt_keys(const char* cs_enc, const char* cs_dec,
@@ -225,6 +226,9 @@ namespace pkodev
 
 			// Send a message to the system chat channel
 			void system_notice(const std::string& message);
+
+			// Get mutex
+			std::recursive_mutex& get_lock() const { return m_mtx; }
 
 		private:
 
@@ -313,6 +317,9 @@ namespace pkodev
 
 			// Game logic related data
 			player_data m_player_data;
+
+			// Mutex
+			mutable std::recursive_mutex m_mtx;
 	};
 
 	// Network bridge class creator

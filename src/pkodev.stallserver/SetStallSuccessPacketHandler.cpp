@@ -78,21 +78,20 @@ namespace pkodev
 
 			// Look for offline stalls with the same IP
 			bridge.server().offline_bridges().for_each(
-				[&bridge, &counter, &max_stalls](Bridge& other, bool& stop)
+				[&bridge, &counter, &max_stalls](Bridge& other)
 				{
 					// Compare IP addresses
 					if (bridge.game_address().ip == other.game_address().ip)
 					{
-						// Increment stalls counter
-						++counter;
-
 						// Check stalls counter
-						if (counter == max_stalls)
+						if (++counter == max_stalls)
 						{
 							// Stop the loop
-							stop = true;
+							return true;
 						}
 					}
+
+					return false;
 				}
 			);
 

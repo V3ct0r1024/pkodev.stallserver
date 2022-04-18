@@ -62,30 +62,31 @@ namespace pkodev
 		bool relogin = false;
 		
 		// Looking for account in the list of offline stalls
-		auto other = bridge.server().offline_bridges().find_by_account(m_login);
+		auto opt = bridge.server().offline_bridges().find_by_account(m_login);
 
 		// Check that the account is in an offline stall now
-		if (other)
+		if (opt.has_value() == true)
 		{
+			// Get pointer to the bridge
+			Bridge* other = opt.value();
+
+			// Lock the other bridge
+			std::lock_guard<std::recursive_mutex> lock(other->get_lock());
+
 			// Get a reference to game data of player in offline stall
-			player_data& other_data = (*other)->player();
+			player_data& other_data = other->player();
 
+			// Check password
+			if (other_data.password_md5 == m_password_md5)
 			{
-				// Check password
-				if (other_data.password_md5 == m_password_md5)
-				{
-					// Create disconnect packet
-					DisconnectPacket disconnect;
+				// Raise reconnection flag
+				other_data.reconnecting = relogin = true;
 
-					// Raise reconnection flag
-					other_data.reconnecting = true;
+				// Create disconnect packet
+				DisconnectPacket disconnect;
 
-					// Wait for reconnection
-					relogin = true;
-
-					// Send packet to disconnect player in offline stall
-					bool ret = (*other)->send_packet_gate(disconnect);
-				}
+				// Send packet to disconnect player in offline stall
+				other->send_packet_gate(disconnect);
 			}
 		}
 		
@@ -98,19 +99,20 @@ namespace pkodev
 		data.version = m_version;
 
 		// Build login packet
-		data.login_packet.set_chapstring(data.chapstr);
-		data.login_packet.set_nobill(m_nobill);
-		data.login_packet.set_login(m_login);
-		data.login_packet.set_password(m_password_md5);
-		data.login_packet.set_mac_address(m_mac_address);
-		data.login_packet.set_flag(m_flag);
-		data.login_packet.set_version(m_version);
+		LoginPacket& pkt = data.login_packet;
+		pkt.set_chapstring(data.chapstr);
+		pkt.set_nobill(m_nobill);
+		pkt.set_login(m_login);
+		pkt.set_password(m_password_md5);
+		pkt.set_mac_address(m_mac_address);
+		pkt.set_flag(m_flag);
+		pkt.set_version(m_version);
 
 		// Check that reconnection is not required
 		if (relogin == false)
 		{
 			// Send login packet to the server
-			bridge.send_packet_gate(data.login_packet);
+			bridge.send_packet_gate(pkt);
 		}
 
 		// Do not pass the packet further
