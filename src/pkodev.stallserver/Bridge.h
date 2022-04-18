@@ -192,9 +192,6 @@ namespace pkodev
 			// Connect to GateServer.exe
 			void connect();
 
-			// Disconnect from GateServer.exe
-			void disconnect();
-
 			// Get Game.exe network address
 			inline const ip_address& game_address() const { return m_client_ctx.address; }
 
@@ -223,9 +220,6 @@ namespace pkodev
 			// Update packet encryption keys
 			void update_encrypt_keys(const char* cs_enc, const char* cs_dec,
 				const char* sc_enc, const char* sc_dec);
-
-			// Send a message to the system chat channel
-			void system_notice(const std::string& message);
 
 			// Get mutex
 			std::recursive_mutex& get_lock() const { return m_mtx; }

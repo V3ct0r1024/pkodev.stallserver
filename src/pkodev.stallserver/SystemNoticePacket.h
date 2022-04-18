@@ -10,8 +10,9 @@ namespace pkodev
 	{
 		public:
 
-			// Constructor
+			// Constructors
 			SystemNoticePacket();
+			SystemNoticePacket(const std::string& message);
 
 			// Destructor
 			~SystemNoticePacket();

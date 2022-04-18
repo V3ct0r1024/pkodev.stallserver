@@ -4,8 +4,6 @@
 #include "Utils.h"
 #include "Logger.h"
 
-#include "SystemNoticePacket.h"
-
 namespace pkodev
 {
 	// Constructor of a data structure for network exchange with the network bridge side
@@ -101,13 +99,14 @@ namespace pkodev
 					if (m_player_data.authed == false)
 					{
 						// Kick the player from the server
-						//on_disconnect(endpoint_type_t::gate);
+						on_disconnect(endpoint_type_t::gate);
 					}
 				}
 			);
 		}
 		
 		// Create an offline stall timer
+		if (m_server.settings().max_offline_time > 0)
 		{
 			// Create the timer
 			m_trade_timer = std::make_unique<Timer>(w.evbase, "Offline stall timer");
@@ -279,7 +278,7 @@ namespace pkodev
 				if (what & EV_READ)
 				{
 					// Handle the read event
-					bool ret = bridge.on_read(server, client);
+					const bool ret = bridge.on_read(server, client);
 
 					// Check if the event was successfully handled
 					if (ret == false)
@@ -293,7 +292,7 @@ namespace pkodev
 				if (what & EV_WRITE)
 				{
 					// Handle the write event
-					bool ret = bridge.on_write(client, server);
+					const bool ret = bridge.on_write(client, server);
 
 					// Check if the event was successfully handled
 					if (ret == false)
@@ -330,7 +329,7 @@ namespace pkodev
 				if (what & EV_READ)
 				{
 					// Handle the read event
-					bool ret = bridge.on_read(client, server);
+					const bool ret = bridge.on_read(client, server);
 
 					// Check if the event was successfully handled
 					if (ret == false)
@@ -347,13 +346,13 @@ namespace pkodev
 					if (server.connected == false)
 					{
 						// GateServer.exe socket error code
-						int error = utils::network::get_socket_error(server.socket);
+						const int error = utils::network::get_socket_error(server.socket);
 
 						// Check that GateServer.exe connected without errors
 						if (error == 0)
 						{
 							// Connected to GateServer.exe
-							bool ret = bridge.on_connect();
+							const bool ret = bridge.on_connect();
 
 							// Check that connect event handling succeed
 							if (ret == false)
@@ -374,7 +373,7 @@ namespace pkodev
 					else
 					{
 						// Handle the write event
-						bool ret = bridge.on_write(server, client);
+						const bool ret = bridge.on_write(server, client);
 
 						// Check if the event was successfully handled
 						if (ret == false)
@@ -456,13 +455,6 @@ namespace pkodev
 		}
 	}
 
-	// Disconnect from GateServer.exe
-	void Bridge::disconnect()
-	{
-
-		on_disconnect(endpoint_type_t::gate);
-	}
-
 	// Update packet encryption keys
 	void Bridge::update_encrypt_keys(const char* cs_enc, const char* cs_dec,
 		const char* sc_enc, const char* sc_dec)
@@ -471,19 +463,6 @@ namespace pkodev
 		std::memcpy(m_client_ctx.enc_send_key, cs_enc, common::enc_packet_key_len);
 		std::memcpy(m_server_ctx.enc_recv_key, sc_enc, common::enc_packet_key_len);
 		std::memcpy(m_server_ctx.enc_send_key, sc_dec, common::enc_packet_key_len);
-	}
-
-	// Send a message to the system chat channel
-	void Bridge::system_notice(const std::string& message)
-	{
-		// System notice packet
-		SystemNoticePacket packet;
-
-		// Set the message
-		packet.set_message(message);
-
-		// Send packet to Game.exe
-		send_packet_game(packet);
 	}
 
 	// GateServer.exe connected event
@@ -539,7 +518,7 @@ namespace pkodev
 		char tmp[common::max_packet_size];
 
 		// Read data from socket into the temporary buffer
-		int ret = ::recv(from.socket, tmp, sizeof(tmp), 0);
+		const int ret = ::recv(from.socket, tmp, sizeof(tmp), 0);
 
 		// Check that connection was closed by other side
 		if (ret == 0)
@@ -559,7 +538,7 @@ namespace pkodev
 			}
 
 			// Wait for data read event again
-			int result = event_add(from.read_event, nullptr);
+			const int result = event_add(from.read_event, nullptr);
 
 			// Check that event is added to the event loop
 			if (result == -1)
@@ -584,8 +563,9 @@ namespace pkodev
 			// Split the data in the input buffer into packets
 			while (from.recv_buf->can_read_bytes(2) == true)
 			{
+
 				// Read packet size
-				std::size_t packet_size = static_cast<std::size_t>(from.recv_buf->read_uint16());
+				const std::size_t packet_size = static_cast<std::size_t>(from.recv_buf->read_uint16());
 
 				// Check packet size
 				if ((packet_size < 2) || (packet_size != 2 && packet_size < 6))
@@ -608,7 +588,7 @@ namespace pkodev
 					from.recv_buf->read_rollback();
 
 					// Wait for data read event again
-					int result = event_add(from.read_event, nullptr);
+					const int result = event_add(from.read_event, nullptr);
 
 					// Check that event is added to the event loop
 					if (result == -1)
@@ -628,7 +608,7 @@ namespace pkodev
 				bool pass = true;
 
 				// Is packet encryption enabled
-				bool comm_encrypt = m_player_data.comm_encrypt;
+				const bool comm_encrypt = m_player_data.comm_encrypt;
 
 				// Process the packet
 				if (packet_size > 2)
@@ -677,7 +657,7 @@ namespace pkodev
 					from.in_buf->seek_read(2);
 
 					// Get session ID
-					unsigned int session_id = static_cast<unsigned int>(from.in_buf->read_uint32());
+					const unsigned int session_id = static_cast<unsigned int>(from.in_buf->read_uint32());
 
 					// Check session ID
 					if ((session_id != common::SESSION_ID_80000000) && (session_id != common::SESSION_ID_00000001))
@@ -687,7 +667,7 @@ namespace pkodev
 					}
 
 					// Get packet ID
-					unsigned short int packet_id = static_cast<unsigned short int>(from.in_buf->read_uint16());
+					const unsigned short int packet_id = static_cast<unsigned short int>(from.in_buf->read_uint16());
 
 					// Check packet ID
 					if (
@@ -736,7 +716,7 @@ namespace pkodev
 					}
 
 					// Check if packet encryption is enabled
-					if (comm_encrypt == true)
+					if ( (pass == true) && (comm_encrypt == true) )
 					{
 						// Encrypt the packet
 						from.in_buf->apply(
@@ -751,53 +731,55 @@ namespace pkodev
 					}
 				}
 
+				// Check the other side is connected
+				if (to.connected == true)
 				{
-					// Check the other side is connected
-					if (to.connected == true)
+					// Check the packet length
+					if (packet_size > 2)
 					{
-						// Check the packet length
-						if (packet_size > 2)
+						// Check that the packet needs to be transferred further
+						if (pass == true)
 						{
-							// Check that the packet needs to be transferred further
-							if (pass == true)
+							// Restart all read operations in the input packet processing buffer
+							from.in_buf->seek_read(0);
+
+							// The number of bytes to copy
+							std::size_t counter = packet_size;
+
+							// Copy the packet from the input packet processing buffer to the output buffer of other side
+							while (counter != 0)
 							{
-								// Restart all read operations in the input packet processing buffer
-								from.in_buf->seek_read(0);
+								// Determine the minimum size of the data block
+								std::size_t block_size = min(counter, sizeof(tmp));
 
-								// The number of bytes to copy
-								std::size_t counter = packet_size;
+								// Read a block of data from the input line buffer
+								from.in_buf->read(tmp, block_size);
 
-								// Copy the packet from the input packet processing buffer to the output buffer of other side
-								while (counter != 0)
-								{
-									// Determine the minimum size of the data block
-									std::size_t block_size = min(counter, sizeof(tmp));
+								// Write a block of data to the output ring buffer
+								to.send_buf->write(tmp, block_size);
 
-									// Read a block of data from the input line buffer
-									from.in_buf->read(tmp, block_size);
-
-									// Write a block of data to the output ring buffer
-									to.send_buf->write(tmp, block_size);
-
-									// Reduce the number of packet bytes that are left to copy
-									counter -= block_size;
-								}
-							}
-							else
-							{
-								// Write a ping request/response to the output buffer of other side
-								to.send_buf->write_uint16(2);
+								// Reduce the number of packet bytes that are left to copy
+								counter -= block_size;
 							}
 						}
-						else
+					}
+					else
+					{
+						// Check that sender request a ping response
+						if (packet_size == 2)
 						{
-							// Check that sender request a ping response
-							if (packet_size == 2)
-							{
-								// Write a ping response to the output buffer of sender side
-								from.send_buf->write_uint16(2);
-							}
+							// Write a ping response to the output buffer of sender side
+							to.send_buf->write_uint16(2);
 						}
+					}
+				}
+				else
+				{
+					// Check that sender request a ping response
+					if (packet_size == 2)
+					{
+						// Write a ping response to the output buffer of sender side
+						from.send_buf->write_uint16(2);
 					}
 				}
 				
@@ -805,53 +787,52 @@ namespace pkodev
 				from.recv_buf->read_commit();
 
 				// Increase the counter of received packets
-				from.packet_counter++;
-			}
+				++from.packet_counter;
 
+			} // Packets splitting loop
+
+			// Send the data to the other side
+			if (to.connected == true)
 			{
-				// Send the data to the other side
-				if (to.connected == true)
+				// The other side is connected, transfer the data further
+				if (to.send_buf->get_readable_length() > 0)
 				{
-					// The other side is connected, transfer the data further
-					if (to.send_buf->get_readable_length() > 0)
+					// Add read event
+					const int result = event_add(to.write_event, nullptr);
+
+					// Check that event is added to the event loop
+					if (result == -1)
 					{
-						// Add read event
-						int result = event_add(to.write_event, nullptr);
+						// Write a message to log
+						Logger::Instance().log("Failed to add socket read event in read callback while transferring the data to the receiver side!");
 
-						// Check that event is added to the event loop
-						if (result == -1)
-						{
-							// Write a message to log
-							Logger::Instance().log("Failed to add socket read event in read callback while transfer the data to the receiver side!");
-
-							// Close connection
-							return false;
-						}
-					}
-					else
-					{
-						// The other side is disconnected, transfer the data to the sender side
-						if (from.send_buf->get_readable_length() > 0)
-						{
-							// Add read event
-							int result = event_add(from.write_event, nullptr);
-
-							// Check that event is added to the event loop
-							if (result == -1)
-							{
-								// Write a message to log
-								Logger::Instance().log("Failed to add socket read event in read callback while transfer the data to the sender side!");
-
-								// Close connection
-								return false;
-							}
-						}
+						// Close connection
+						return false;
 					}
 				}
 			}
-			
+			else
+			{
+				// The other side is disconnected, transfer the data to the sender side
+				if (from.send_buf->get_readable_length() > 0)
+				{
+					// Add read event
+					const int result = event_add(from.write_event, nullptr);
+
+					// Check that event is added to the event loop
+					if (result == -1)
+					{
+						// Write a message to log
+						Logger::Instance().log("Failed to add socket read event in read callback while transferring the data to the sender side!");
+
+						// Close connection
+						return false;
+					}
+				}
+			}
+
 			// Wait for data read event again
-			int result = event_add(from.read_event, nullptr);
+			const int result = event_add(from.read_event, nullptr);
 
 			// Check that event is added to the event loop
 			if (result == -1)
@@ -898,7 +879,7 @@ namespace pkodev
 		try
 		{
 			// The number of bytes in the output buffer
-			std::size_t n = to.send_buf->get_readable_length();
+			const std::size_t n = to.send_buf->get_readable_length();
 
 			// Check that the output buffer has data to send
 			if (n == 0)
@@ -911,13 +892,13 @@ namespace pkodev
 			char tmp[common::max_packet_size];
 
 			// Calculate the minimum size of the data block to read from the output buffer
-			std::size_t block_size = min(sizeof(tmp), n);
+			const std::size_t block_size = min(sizeof(tmp), n);
 
 			// Read data into the temporary buffer
 			to.send_buf->read(tmp, block_size);
 
 			// Write data to socket
-			int ret = ::send(to.socket, tmp, block_size, 0);
+			const int ret = ::send(to.socket, tmp, block_size, 0);
 
 			// Check that connection was closed by other side
 			if (ret == 0)
@@ -937,7 +918,7 @@ namespace pkodev
 				}
 
 				// Wait for a data write event again
-				int result = event_add(to.write_event, nullptr);
+				const int result = event_add(to.write_event, nullptr);
 
 				// Check that event is added to the event loop
 				if (result == -1)
@@ -960,7 +941,7 @@ namespace pkodev
 			if (to.send_buf->get_readable_length() > 0)
 			{
 				// Wait for a data write event again
-				int result = event_add(to.write_event, nullptr);
+				const int result = event_add(to.write_event, nullptr);
 
 				// Check that event is added to the event loop
 				if (result == -1)
@@ -1040,10 +1021,10 @@ namespace pkodev
 						if (ret == true)
 						{
 							// Offline trade time limit from settings file
-							unsigned int trade_time = m_server.settings().max_offline_time;
+							const unsigned int trade_time = m_server.settings().max_offline_time;
 
 							// Check that the limit is enabled
-							if (trade_time != 0)
+							if (trade_time > 0)
 							{
 								// Start offline trade timer
 								ret = m_trade_timer->start(static_cast<unsigned long long>(trade_time) * 1000);
@@ -1092,7 +1073,7 @@ namespace pkodev
 					if (m_player_data.offline_stall == true)
 					{
 						// Update the offline stalls list
-						bool ret = m_server.offline_bridges().remove(this);
+						const bool ret = m_server.offline_bridges().remove(this);
 
 						// Check result
 						if (ret == false)
@@ -1169,7 +1150,7 @@ namespace pkodev
 			ctx.out_buf->clear();
 
 			// Get packet size
-			std::size_t packet_size = packet.size();
+			const std::size_t packet_size = packet.size();
 
 			// Check that the packet fits into the output network buffer
 			if (packet_size > ctx.out_buf->size())
@@ -1201,7 +1182,7 @@ namespace pkodev
 			}
 
 			// Write the packet to the output processing buffer
-			std::size_t written = packet.write((*ctx.out_buf));
+			const std::size_t written = packet.write((*ctx.out_buf));
 
 			// Check if packet encryption is enabled
 			if (m_player_data.comm_encrypt == true)
@@ -1241,7 +1222,7 @@ namespace pkodev
 			}
 
 			// Wait for a data write event
-			int ret = event_add(ctx.write_event, nullptr);
+			const int ret = event_add(ctx.write_event, nullptr);
 
 			// Check that event is added to the event loop
 			if (ret == -1)

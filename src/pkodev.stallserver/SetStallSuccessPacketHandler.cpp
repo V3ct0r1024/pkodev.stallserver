@@ -1,4 +1,5 @@
 #include "SetStallSuccessPacketHandler.h"
+#include "SystemNoticePacket.h"
 #include "RingBuffer.h"
 #include "Bridge.h"
 #include "Utils.h"
@@ -61,7 +62,7 @@ namespace pkodev
 			player.offline_stall = false;
 
 			// Send a message to the player's system chat channel
-			bridge.system_notice("Offline stall not installed: The offline stall system is disabled on this map.");
+			bridge.send_packet_game(SystemNoticePacket("Offline stall not installed: The offline stall system is disabled on this map."));
 
 			// Pass the packet further
 			return true;
@@ -102,7 +103,7 @@ namespace pkodev
 				player.offline_stall = false;
 
 				// Send a message to the player's system chat channel
-				bridge.system_notice("Offline stall not installed: The maximum number of offline stalls is set from your IP address.");
+				bridge.send_packet_game(SystemNoticePacket("Offline stall not installed: The maximum number of offline stalls is set from your IP address."));
 
 				// Pass the packet further
 				return true;
@@ -113,7 +114,7 @@ namespace pkodev
 		player.offline_stall = true;
 		
 		// Send a message to the player's system chat channel
-		bridge.system_notice("Offline stall has been installed: Your character will remain trading after disconnecting from the server.");
+		bridge.send_packet_game(SystemNoticePacket("Offline stall has been installed: Your character will remain trading after disconnecting from the server."));
 
 		// Pass the packet further
 		return true;

@@ -1,4 +1,5 @@
 #include "FriendInvitePacketHandler.h"
+#include "SystemNoticePacket.h"
 #include "LinearBuffer.h"
 #include "Bridge.h"
 
@@ -45,13 +46,13 @@ namespace pkodev
 	bool FriendInvitePacketHandler::handle(Bridge& bridge)
 	{
 		// Look for an invitee in the list of offline bridges
-		auto invited = bridge.server().offline_bridges().find_by_character(m_chaname);
+		auto opt = bridge.server().offline_bridges().find_by_character(m_chaname);
 
 		// Check that the invitee was found
-		if (invited)
+		if (opt.has_value() == true)
 		{
 			// Send a message to the inviter
-			bridge.system_notice("This player is offline now!");
+			bridge.send_packet_game(SystemNoticePacket("This player is offline now!"));
 
 			// The invitee is offline
 			return false;
