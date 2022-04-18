@@ -1,4 +1,4 @@
-[![PKOdev.NET](https://a.radikal.ru/a07/2202/b6/64077957c2ec.png "PKOdev.NET")](http://pkodev.net "PKOdev.NET")
+[![logo-background](https://user-images.githubusercontent.com/3164064/163711104-29410e0d-3c86-411a-9319-9ffeaa62abb8.png)](http://pkodev.net "PKOdev.NET")
 
 ## PKOdev.NET Stall Server
 Stall Server project for TOP/PKO/KOP game for the implementation of a system of offline stalls.
@@ -18,8 +18,9 @@ The application is currently under development. The application has not been ful
 ## to-do
 * ~~Translate comments in files **Server.h** and **Server.cpp** to English language;~~
 * ~~Fix application crash when processing packets;~~
-* Fix application crash on startup when local port is closed;
-* Make thread synchronization when processing packets;
+* ~~Fix application crash on startup when local port is closed;~~
+* ~~Fix bridge hanging when blocking packets on enabled encryption in GateServer.cfg~~ (thanks to @small666 for finding the bug);
+* ~~Make thread synchronization when processing packets;~~
 * Close the offline stall if it is empty (sold out);
 * Modification of GateServer.exe to determine the IP addresses of clients that are behind the server of offline stalls. At this point in the logs and database, the IP addresses of all clients will be written as **127.0.0.1** (if both GateServer.exe and pkodev.stallserver.exe are running on the same machine).
 * Compatibility with Corsairs Online (CO) source code.
