@@ -21,8 +21,8 @@ The application is currently under development. The application has not been ful
 * ~~Fix application crash on startup when local port is closed;~~
 * ~~Fix bridge hanging when blocking packets on enabled encryption in GateServer.cfg~~ (thanks to @small666 for finding the bug);
 * ~~Make thread synchronization when processing packets;~~
-* Close the offline stall if it is empty (sold out);
-* Modification of GateServer.exe to determine the IP addresses of clients that are behind the server of offline stalls. At this point in the logs and database, the IP addresses of all clients will be written as **127.0.0.1** (if both GateServer.exe and pkodev.stallserver.exe are running on the same machine).
+* ~~Close the offline stall if it is empty (sold out);~~
+* ~~Modification of GateServer.exe to determine the IP addresses of clients that are behind the server of offline stalls. At this point in the logs and database, the IP addresses of all clients will be written as **127.0.0.1** (if both GateServer.exe and pkodev.stallserver.exe are running on the same machine);~~
 * Compatibility with Corsairs Online (CO) source code.
 
 ## Building and running
