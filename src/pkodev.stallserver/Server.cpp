@@ -195,26 +195,26 @@ namespace pkodev
 				// Print packet handlers from Game.exe to the log
 				{
 					// Write a log
-					Logger::Instance().log("Registered (%d) Game.exe packet handlers:", client_handlers.size());
+					Logger::Instance().log("Registered (%u) Game.exe packet handlers:", client_handlers.size());
 
 					// Walking through the list
 					for (const auto& info : client_handlers)
 					{
 						// Print a handler . . .
-						Logger::Instance().log("* Packet ID %d (%04X): %s.", info.id, info.id, info.name.c_str());
+						Logger::Instance().log("* Packet ID %u (%04X): %s.", info.id, info.id, info.name.c_str());
 					}
 				}
 
 				// Print packet handlers from GateServer.exe to the log
 				{
 					// Write a log
-					Logger::Instance().log("Registered (%d) GateServer.exe packet handlers:", server_handlers.size());
+					Logger::Instance().log("Registered (%u) GateServer.exe packet handlers:", server_handlers.size());
 
 					// Walking through the list
 					for (const auto& info : server_handlers)
 					{
 						// Print a handler . . .
-						Logger::Instance().log("* Packet ID %d (%04X): %s.", info.id, info.id, info.name.c_str());
+						Logger::Instance().log("* Packet ID %u (%04X): %s.", info.id, info.id, info.name.c_str());
 					}
 				}
 			}
@@ -419,7 +419,7 @@ namespace pkodev
 	void Server::init_bridge_pool()
 	{
 		// Write a log
-		Logger::Instance().log("Allocating memory for %d clients . . .", m_cfg.max_player);
+		Logger::Instance().log("Allocating memory for %u clients . . .", m_cfg.max_player);
 
 		// Create a pool of network bridges
 		try
@@ -483,7 +483,7 @@ namespace pkodev
 		);
 
 		// Write a log
-		Logger::Instance().log("Starting %d worker threads . . .", count);
+		Logger::Instance().log("Starting %u worker threads . . .", count);
 
 		// Allocate some memory for the workers list
 		m_workers.reserve(count);
@@ -512,7 +512,7 @@ namespace pkodev
 				m_workers.push_back({evbase, std::move(th)});
 				
 				// Write a log
-				Logger::Instance().log("Worker thread %d/%d (ID: %04X) successfully started!", (i + 1), count, thread_id);
+				Logger::Instance().log("Worker thread %u/%u (ID: %04X) successfully started!", (i + 1), count, thread_id);
 			}
 			else
 			{
@@ -536,7 +536,7 @@ namespace pkodev
 				m_workers.clear();
 
 				// Write a log
-				Logger::Instance().log("Failed to create worker thread %d/%d!", (i + 1), count);
+				Logger::Instance().log("Failed to create worker thread %u/%u!", (i + 1), count);
 
 				// Raise the server exception
 				throw server_exception("Failed to create worker threads!");;
@@ -592,7 +592,7 @@ namespace pkodev
 	void Server::init_listener()
 	{
 		// Write a log
-		Logger::Instance().log("The process of listening for incoming connections on address (%s:%d) starts . . .", m_cfg.game_host.c_str(), m_cfg.game_port);
+		Logger::Instance().log("The process of listening for incoming connections on address (%s:%u) starts . . .", m_cfg.game_host.c_str(), m_cfg.game_port);
 
 		// The local address structure
 		sockaddr_in local;

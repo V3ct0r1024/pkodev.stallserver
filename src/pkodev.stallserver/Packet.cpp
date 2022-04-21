@@ -175,7 +175,7 @@ namespace pkodev
 		if (idx >= m_fields.size())
 		{
 			// Write a log
-			Logger::Instance().log( "BasePacket::field(): Wrong field index (%d)! Fields number (%d). Packet ID (%d)",
+			Logger::Instance().log( "BasePacket::field(): Wrong field index (%u)! Fields number (%u). Packet ID (%u)",
 				idx, m_fields.size(), id() );
 
 			// Wroing index

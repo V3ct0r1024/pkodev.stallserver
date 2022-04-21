@@ -1157,7 +1157,7 @@ namespace pkodev
 			{
 				// Write a message to log
 				Logger::Instance().log(
-					"Can't write a packet (ID: %d) into output processing buffer: The packet is too large (%d bytes)",
+					"Can't write a packet (ID: %u) into output processing buffer: The packet is too large (%u bytes)",
 					packet.id(),
 					packet_size
 				);
@@ -1171,8 +1171,8 @@ namespace pkodev
 			{
 				// Write a message to log
 				Logger::Instance().log(
-					"Can't write a packet (ID: %d) into output network buffer: "
-						"Not enough free space in the output network buffer for packet (%d bytes) ",
+					"Can't write a packet (ID: %u) into output network buffer: "
+						"Not enough free space in the output network buffer for packet (%u bytes) ",
 					packet.id(),
 					packet_size
 				);
