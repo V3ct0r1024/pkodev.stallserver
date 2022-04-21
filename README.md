@@ -27,7 +27,7 @@ The application is currently under development. The application has not been ful
 
 ## Building and running
 1. Clone the repository with the project to your disk;
-2. Open the solution file **pkodev.stallserver.sln** in **Visual Studio 2019 Community** (or higher version);
+2. Open the solution file **pkodev.stallserver.sln** in **Visual Studio 2022 Community**;
 3. Build the solution. The server executables will appear in the **bin** folder;
 4. Place the configuration file **pkodev.stallserver.cfg** from the **cfg** folder in the same directory as the server executable file **pkodev.stallserver.exe**;
 5. Customize the configuration file **pkodev.stallserver.cfg** (the file is well commented);
