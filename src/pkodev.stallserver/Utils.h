@@ -22,6 +22,9 @@ namespace pkodev
 
 				// Get pending error on the socket
 				static int get_socket_error(SOCKET fd);
+
+				// Convert IP address from string to integer form
+				static unsigned int ip_address_to_int(const std::string& ip_address);
 		};
 
 		// Data validation functions

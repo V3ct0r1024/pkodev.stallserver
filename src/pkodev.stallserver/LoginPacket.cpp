@@ -9,6 +9,7 @@ namespace pkodev
 		m_login(""),
 		m_mac_address(""),
 		m_flag(0),
+		m_ip_address(0),
 		m_version(0),
 		m_chapstring(""),
 		m_password_length(0)
@@ -21,6 +22,7 @@ namespace pkodev
 		assign(m_login);
 		assign(m_password_des, m_password_length);
 		assign(m_mac_address);
+		assign(m_ip_address);
 		assign(m_flag);
 		assign(m_version);
 	}

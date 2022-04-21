@@ -64,6 +64,22 @@ namespace pkodev
 		return errcode;
 	}
 
+	// Convert IP address from string to integer form
+	unsigned int utils::network::ip_address_to_int(const std::string& ip_address)
+	{
+		// The result
+		unsigned int ret = 0;
+		
+		// Convert IP address
+		if ( inet_pton(AF_INET, ip_address.c_str(), reinterpret_cast<void*>(&ret)) != 1 )
+		{
+			// Error, invalid IP address
+			return 0; // 0.0.0.0
+		}
+
+		return ret;
+	}
+
 	// Check MAC address
 	bool utils::validation::check_mac_address(const std::string& mac_address)
 	{

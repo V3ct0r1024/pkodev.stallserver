@@ -7,7 +7,6 @@
  * 
  * This program is free software
  */
-
 #include "Utils.h"
 #include "Logger.h"
 #include "ConfigFile.h"
@@ -72,7 +71,6 @@ int main(int argc, char *argv[])
     {
         // Cancel server start
         std::cout << "[Error] Server startup is canceled!" << std::endl;
-        system("PAUSE");
         return 1;
     }
 
@@ -223,6 +221,7 @@ bool LoadConfig(const std::string& path, pkodev::settings_t& settings)
             (cfg.has("ToClient", "max_player")          == true) &&
             (cfg.has("ToGate",   "host")                == true) &&
             (cfg.has("ToGate",   "port")                == true) &&
+            (cfg.has("ToGate",   "ip_mod")              == true) &&
          /* (cfg.has("Map",      "map")                 == true) && */
             (cfg.has("Game",     "max_stalls_per_ip")   == true) &&
             (cfg.has("Game",     "max_offline_time")    == true)
@@ -244,8 +243,9 @@ bool LoadConfig(const std::string& path, pkodev::settings_t& settings)
         settings.connection_interval = static_cast<unsigned long long>(cfg.get("ToClient", "connection_interval", "1000").to_integer());
 
         // GateServer.exe connection settings
-        settings.gate_host = cfg.get("ToGate", "host", "127.0.0.1").to_string();
-        settings.gate_port = static_cast<unsigned short int>(cfg.get("ToGate", "port", "2715").to_integer());
+        settings.gate_host   = cfg.get("ToGate", "host", "127.0.0.1").to_string();
+        settings.gate_port   = static_cast<unsigned short int>(cfg.get("ToGate", "port", "2715").to_integer());
+        settings.gate_ip_mod = cfg.get("ToGate", "ip_mod", "true").to_bool();
 
         // List of maps on which the offline stall system works
         for (std::size_t i = 0;

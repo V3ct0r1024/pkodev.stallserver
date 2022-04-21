@@ -1,5 +1,6 @@
 #include "Packet.h"
 #include "RingBuffer.h"
+#include "Logger.h"
 
 #include <algorithm>
 
@@ -9,7 +10,7 @@ namespace pkodev
 	BasePacket::BasePacket()
 	{
 		// Reserve some memory for packet fields
-		m_fields.reserve(8);
+		m_fields.reserve(16);
 	}
 
 	// Destructor
@@ -26,10 +27,17 @@ namespace pkodev
 
 		// Calculate the size of the packet as sum of size of all its fields
 		std::for_each(
-			m_fields.begin(),
-			m_fields.end(),
+			m_fields.cbegin(),
+			m_fields.cend(),
 			[&](const packet_field& field)
 			{
+				// Check that field is enabled
+				if (field.enabled == false)
+				{
+					// Skip the field
+					return;
+				}
+
 				// Select the field type
 				switch (field.type)
 				{
@@ -95,10 +103,17 @@ namespace pkodev
 
 		// Write packet body
 		std::for_each(
-			m_fields.begin(),
-			m_fields.end(),
+			m_fields.cbegin(),
+			m_fields.cend(),
 			[&](const packet_field& field)
 			{
+				// Check that field is enabled
+				if (field.enabled == false)
+				{
+					// Skip the field
+					return;
+				}
+
 				// Select the field type
 				switch (field.type)
 				{
@@ -151,6 +166,24 @@ namespace pkodev
 
 		// Return packet size
 		return packet_size;
+	}
+
+	// Enable or disable packet field
+	void BasePacket::field(unsigned int idx, bool enabled)
+	{
+		// Check index
+		if (idx >= m_fields.size())
+		{
+			// Write a log
+			Logger::Instance().log( "BasePacket::field(): Wrong field index (%d)! Fields number (%d). Packet ID (%d)",
+				idx, m_fields.size(), id() );
+
+			// Wroing index
+			return;
+		}
+
+		// Update field state
+		m_fields[idx].enabled = enabled;
 	}
 
 	// Helper method for storing arrays of bytes

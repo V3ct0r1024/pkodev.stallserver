@@ -52,6 +52,7 @@ namespace pkodev
 		// Connection settings for GateServer.exe
 		std::string gate_host;         // Address StallServer.exe -> GateServer.exe
 		unsigned short int gate_port;  // Port  StallServer.exe -> GateServer.exe
+		bool gate_ip_mod;              // Is the mod 'pkodev.mod.stallip' installed for GateServer.exe?
 
 		// The list of maps on which the system of offline stalls works
 		map_list_t maps;
@@ -66,7 +67,7 @@ namespace pkodev
 		settings_t() :
 			game_host(""), game_port(0), max_player(0), 
 			max_clients_per_ip(0), connection_interval(0),
-			gate_host(""), gate_port(0),
+			gate_host(""), gate_port(0), gate_ip_mod(true),
 			max_stalls_per_ip(0), max_offline_time(0)
 		{
 			maps.reserve(8);

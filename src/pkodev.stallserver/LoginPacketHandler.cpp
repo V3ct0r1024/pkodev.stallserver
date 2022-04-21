@@ -5,7 +5,6 @@
 #include "DES.h"
 #include "DisconnectPacket.h"
 
-
 namespace pkodev
 {
 	// Constructor
@@ -105,8 +104,12 @@ namespace pkodev
 		pkt.set_login(m_login);
 		pkt.set_password(m_password_md5);
 		pkt.set_mac_address(m_mac_address);
+		pkt.set_ip_address(bridge.game_address().ip);
 		pkt.set_flag(m_flag);
 		pkt.set_version(m_version);
+
+		// Check that we need to add client's IP address to the login packet
+		pkt.field(4, bridge.server().settings().gate_ip_mod);
 
 		// Check that reconnection is not required
 		if (relogin == false)

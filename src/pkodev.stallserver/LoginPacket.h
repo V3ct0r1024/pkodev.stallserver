@@ -1,5 +1,6 @@
 #pragma once
 #include "Packet.h"
+#include "Utils.h"
 
 namespace pkodev
 {
@@ -25,6 +26,7 @@ namespace pkodev
 			void set_password(const std::string& password);
 			inline void set_mac_address(const std::string& mac_address) { m_mac_address = mac_address; }
 			inline void set_flag(unsigned short int flag) { m_flag = flag; }
+			inline void set_ip_address(const std::string& ip) { m_ip_address = utils::network::ip_address_to_int(ip); }
 			inline void set_version(unsigned short int version) { m_version = version; }
 
 			// Set string with connection time
@@ -40,6 +42,9 @@ namespace pkodev
 
 			// MAC-address
 			std::string m_mac_address;
+
+			// IP address (GateServer.exe IP mod)
+			unsigned int m_ip_address;
 
 			// Field "flag"
 			unsigned short int m_flag;

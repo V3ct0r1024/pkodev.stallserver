@@ -38,6 +38,9 @@ namespace pkodev
 			// Write packet to a buffer
 			std::size_t write(LinearBuffer& buffer) const override;
 
+			// Enable or disable packet field
+			void field(unsigned int idx, bool enabled);
+
 
 		protected:
 
@@ -61,10 +64,14 @@ namespace pkodev
 				// Data pointer
 				void* data;
 
+				// Is field enabled?
+				bool enabled;
+
 				// Constructor
 				packet_field(packet_field_type_t type_, void* data_) :
 					type(type_), 
-					data(data_)
+					data(data_),
+					enabled(true)
 				{
 
 				}
