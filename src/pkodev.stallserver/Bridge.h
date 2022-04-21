@@ -109,7 +109,10 @@ namespace pkodev
 		unsigned short int version;
 
 		// Is the player in offline stall mode
-		bool offline_stall;
+		bool set_stall;
+
+		// Number of items in offline stall
+		unsigned int item_number;
 
 		// Is packet encryption enabled
 		bool comm_encrypt;
@@ -132,6 +135,9 @@ namespace pkodev
 		// Current map (garner, magicsea, darkblue, ...)
 		std::string map;
 
+		// Character ID
+		unsigned int cha_id;
+
 		// Character nickname
 		std::string cha_name;
 
@@ -145,12 +151,14 @@ namespace pkodev
 		player_data() :
 			authed(false),
 			version(0),
-			offline_stall(false),
+			set_stall(false),
+			item_number(0),
 			comm_encrypt(false),
 			chapstr(""),
 			login(""),
 			password_md5(""),
 			map(""),
+			cha_id(0),
 			cha_name(""),
 			reconnecting(false),
 			session_key_length(0)
@@ -191,6 +199,9 @@ namespace pkodev
 
 			// Connect to GateServer.exe
 			void connect();
+
+			// Disconnect from GateServer.exe
+			void disconnect();
 
 			// Get Game.exe network address
 			inline const ip_address& game_address() const { return m_client_ctx.address; }
@@ -314,6 +325,9 @@ namespace pkodev
 
 			// Mutex
 			mutable std::recursive_mutex m_mtx;
+
+			// Disconnection flag
+			bool m_disconnecting;
 	};
 
 	// Network bridge class creator

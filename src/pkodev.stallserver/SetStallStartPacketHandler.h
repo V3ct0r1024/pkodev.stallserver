@@ -1,21 +1,20 @@
 #pragma once
 #include "PacketHandler.h"
-#include <string>
 
 namespace pkodev
 {
-	// Map enter packet handler
-	// ID: 516
-	// S -> C
-	class EnterMapPacketHandler final : public IPacketHandler
+	// Set stall open packet handler
+	// ID: 330
+	// C -> S
+	class SetStallStartPacketHandler final : public IPacketHandler
 	{
 		public:
 
 			// Constructor
-			EnterMapPacketHandler();
+			SetStallStartPacketHandler();
 
 			// Destructor
-			~EnterMapPacketHandler();
+			~SetStallStartPacketHandler();
 
 			// Packet ID
 			unsigned short int id() const override;
@@ -37,14 +36,8 @@ namespace pkodev
 
 		private:
 
-			// Character ID
-			unsigned int m_chaid;
+			// Item number
+			unsigned int m_item_number;
 
-			// Character name
-			std::string m_chaname;
-
-			// Map name
-			std::string m_mapname;
 	};
-
 }

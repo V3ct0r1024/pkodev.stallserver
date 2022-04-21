@@ -52,16 +52,16 @@ namespace pkodev
 		player_data& player = bridge.player();
 
 
+		// Reset 'set stall' flag
+		player.set_stall = false;
+
 		// Look for the map on which player is currenlty located in list of maps where the offline stall system works
-		auto it = std::find( settings.maps.begin(), settings.maps.end(), utils::string::lower_case(player.map) );
+		auto it = std::find( settings.maps.cbegin(), settings.maps.cend(), utils::string::lower_case(player.map) );
 
 		// Check that player is on map where the offline stall system is disabled
-		if (it == settings.maps.end())
+		if (it == settings.maps.cend())
 		{
 			// The player is on map where offline stall system is disabled
-			player.offline_stall = false;
-
-			// Send a message to the player's system chat channel
 			bridge.send_packet_game(SystemNoticePacket("Offline stall not installed: The offline stall system is disabled on this map."));
 
 			// Pass the packet further
@@ -72,14 +72,14 @@ namespace pkodev
 		if (settings.max_stalls_per_ip != 0)
 		{
 			// Maximum number of offline stalls per IP address
-			const std::size_t max_stalls = static_cast<const std::size_t>(settings.max_stalls_per_ip);
+			const std::size_t max_stalls = static_cast<std::size_t>(settings.max_stalls_per_ip);
 
 			// Counter of offline stalls with the same IP address
 			std::size_t counter = 0;
 
 			// Look for offline stalls with the same IP
 			bridge.server().offline_bridges().for_each(
-				[&bridge, &counter, &max_stalls](Bridge& other)
+				[&bridge, &counter, &max_stalls](const Bridge& other) -> bool
 				{
 					// Compare IP addresses
 					if (bridge.game_address().ip == other.game_address().ip)
@@ -100,9 +100,6 @@ namespace pkodev
 			if (counter == max_stalls)
 			{
 				// The limit of offline stalls on one IP-address has been exceeded
-				player.offline_stall = false;
-
-				// Send a message to the player's system chat channel
 				bridge.send_packet_game(SystemNoticePacket("Offline stall not installed: The maximum number of offline stalls is set from your IP address."));
 
 				// Pass the packet further
@@ -110,8 +107,8 @@ namespace pkodev
 			}
 		}
 
-		// Offline stall is installed
-		player.offline_stall = true;
+		// Stall is installed
+		player.set_stall = true;
 		
 		// Send a message to the player's system chat channel
 		bridge.send_packet_game(SystemNoticePacket("Offline stall has been installed: Your character will remain trading after disconnecting from the server."));

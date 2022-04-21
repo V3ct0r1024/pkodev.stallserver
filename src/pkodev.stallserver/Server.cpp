@@ -14,18 +14,19 @@
 #include "LoginResultPacketHandler.h"
 #include "EnterMapPacketHandler.h"
 #include "SetStallSuccessPacketHandler.h"
+#include "SetStallDelPacketHandler.h"
 #include "PingRequestPacketHandler.h"
-#include "PersonalMessagePacketHandler.h"
-#include "FriendInvitePacketHandler.h"
-#include "TeamInvitePacketHandler.h"
-#include "TalkSessionCreatePacketHandler.h"
 
 #include "LoginPacketHandler.h"
 #include "CreatePinPacketHandler.h"
 #include "UpdatePinPacketHandler.h"
 #include "DisconnectPacketHandler.h"
 #include "SetStallClosePacketHandler.h"
-
+#include "SetStallStartPacketHandler.h"
+#include "PersonalMessagePacketHandler.h"
+#include "FriendInvitePacketHandler.h"
+#include "TeamInvitePacketHandler.h"
+#include "TalkSessionCreatePacketHandler.h"
 
 namespace pkodev
 {
@@ -82,6 +83,7 @@ namespace pkodev
 		handlers->add_handler(std::make_shared<LoginResultPacketHandler>());
 		handlers->add_handler(std::make_shared<EnterMapPacketHandler>());
 		handlers->add_handler(std::make_shared<SetStallSuccessPacketHandler>());
+		handlers->add_handler(std::make_shared<SetStallDelPacketHandler>());
 		handlers->add_handler(std::make_shared<PingRequestPacketHandler>());
 		
 		// C -> S
@@ -94,6 +96,7 @@ namespace pkodev
 		handlers->add_handler(std::make_shared<FriendInvitePacketHandler>());
 		handlers->add_handler(std::make_shared<TeamInvitePacketHandler>());
 		handlers->add_handler(std::make_shared<TalkSessionCreatePacketHandler>());
+		handlers->add_handler(std::make_shared<SetStallStartPacketHandler>());
 
 		// Print the list of registered handlers to the log
 		if (handlers_log == false)

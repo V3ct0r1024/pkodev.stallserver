@@ -50,7 +50,8 @@ namespace pkodev
 	// Network bridge constructor
 	Bridge::Bridge(Server& server) :
 		m_server(server),
-		m_event_base(nullptr)
+		m_event_base(nullptr),
+		m_disconnecting(false)
 	{
 		// Set types of bridge sides
 		m_server_ctx.type = endpoint_type_t::gate;
@@ -82,6 +83,9 @@ namespace pkodev
 		m_server_ctx.socket = INVALID_SOCKET;
 		m_server_ctx.address = gate;
 		m_server_ctx.connected = false;
+
+		// Not disconnecting
+		m_disconnecting = false;
 
 		// Create an authorization timer
 		{
@@ -187,17 +191,22 @@ namespace pkodev
 		{
 			m_player_data.authed = false;
 			m_player_data.version = 0;
-			m_player_data.offline_stall = false;
+			m_player_data.set_stall = false;
+			m_player_data.item_number = 0;
 			m_player_data.comm_encrypt = false;
 			m_player_data.chapstr = "";
 			m_player_data.login = "";
 			m_player_data.password_md5 = "";
 			m_player_data.map = "";
+			m_player_data.cha_id = 0;
 			m_player_data.cha_name = "";
 			m_player_data.reconnecting = false;
 			m_player_data.session_key_length = 0;
 			std::memset(reinterpret_cast<void*>(m_player_data.session_key), 0x00, sizeof(m_player_data.session_key));
 		}
+
+		// Reset disconnection flag
+		m_disconnecting = false;
 	}
 
 	// Connect to GateServer.exe
@@ -455,6 +464,12 @@ namespace pkodev
 		}
 	}
 
+	// Disconnect from GateServer.exe
+	void Bridge::disconnect()
+	{
+		m_disconnecting = true;
+	}
+
 	// Update packet encryption keys
 	void Bridge::update_encrypt_keys(const char* cs_enc, const char* cs_dec,
 		const char* sc_enc, const char* sc_dec)
@@ -707,6 +722,13 @@ namespace pkodev
 						{
 							// Proccess the packet
 							pass = handler->handle(*(this));
+
+							// Check that bridge is in disconnecting state
+							if (m_disconnecting == true)
+							{
+								// Close the bridge
+								return false;
+							}
 						}
 						else
 						{
@@ -875,6 +897,13 @@ namespace pkodev
 	// Socket write event
 	bool Bridge::on_write(endpoint& to, endpoint& from)
 	{
+		// Check that bridge is in disconnecting state
+		if (m_disconnecting == true)
+		{
+			// Close the bridge
+			return false;
+		}
+
 		// Write the data from output buffer to socket
 		try
 		{
@@ -1012,7 +1041,7 @@ namespace pkodev
 					close(m_client_ctx);
 				
 					// Check that player is not in offline stall
-					if (m_player_data.offline_stall == true)
+					if (m_player_data.set_stall == true)
 					{
 						// Add the bridge to the list of offline stalls
 						bool ret = m_server.offline_bridges().add(this);
@@ -1070,7 +1099,7 @@ namespace pkodev
 					}
 
 					// Remove the bridge from the offline stalls list
-					if (m_player_data.offline_stall == true)
+					if (m_player_data.set_stall == true)
 					{
 						// Update the offline stalls list
 						const bool ret = m_server.offline_bridges().remove(this);

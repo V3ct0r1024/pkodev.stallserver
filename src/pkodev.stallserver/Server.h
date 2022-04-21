@@ -63,12 +63,15 @@ namespace pkodev
 		// Maximum trading time in an offline stall (in seconds)
 		unsigned int max_offline_time;
 
+		// Close an offline stall if it is empty
+		bool close_stall_on_empty;
+
 		// Constructor
 		settings_t() :
 			game_host(""), game_port(0), max_player(0), 
 			max_clients_per_ip(0), connection_interval(0),
 			gate_host(""), gate_port(0), gate_ip_mod(true),
-			max_stalls_per_ip(0), max_offline_time(0)
+			max_stalls_per_ip(0), max_offline_time(0), close_stall_on_empty(true)
 		{
 			maps.reserve(8);
 		}

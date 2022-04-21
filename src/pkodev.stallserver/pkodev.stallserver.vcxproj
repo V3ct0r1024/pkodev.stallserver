@@ -119,6 +119,8 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SetStallClosePacketHandler.cpp" />
+    <ClCompile Include="SetStallDelPacketHandler.cpp" />
+    <ClCompile Include="SetStallStartPacketHandler.cpp" />
     <ClCompile Include="SetStallSuccessPacketHandler.cpp" />
     <ClCompile Include="SystemNoticePacket.cpp" />
     <ClCompile Include="TalkSessionCreatePacketHandler.cpp" />
@@ -157,6 +159,8 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SetStallClosePacketHandler.h" />
+    <ClInclude Include="SetStallDelPacketHandler.h" />
+    <ClInclude Include="SetStallStartPacketHandler.h" />
     <ClInclude Include="SetStallSuccessPacketHandler.h" />
     <ClInclude Include="SystemNoticePacket.h" />
     <ClInclude Include="TalkSessionCreatePacketHandler.h" />

@@ -6,8 +6,9 @@ namespace pkodev
 {
 	// Constructor
 	EnterMapPacketHandler::EnterMapPacketHandler() :
-		m_mapname(""),
-		m_chaname("")
+		m_chaid(0),
+		m_chaname(""),
+		m_mapname("")
 	{
 
 	}
@@ -45,8 +46,14 @@ namespace pkodev
 		// Read map name
 		m_mapname = buffer.read_string();
 
+		// Set read position on field with character ID
+		buffer.seek_read(5, LinearBuffer::seek_type::current);
+
+		// Read character ID
+		m_chaid = buffer.read_uint32();
+
 		// Set read position on field with character name
-		buffer.seek_read(13, LinearBuffer::seek_type::current);
+		buffer.seek_read(4, LinearBuffer::seek_type::current);
 
 		// Read character name
 		m_chaname = buffer.read_string();
@@ -59,8 +66,9 @@ namespace pkodev
 		player_data& player = bridge.player();
 
 		// Update the game data
-		player.map = m_mapname;
+		player.cha_id = m_chaid;
 		player.cha_name = m_chaname;
+		player.map = m_mapname;
 
 		// Pass the packet further
 		return true;

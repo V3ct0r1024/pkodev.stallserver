@@ -142,6 +142,12 @@
     <ClCompile Include="TalkSessionCreatePacketHandler.cpp">
       <Filter>Packet Handlers\C -&gt; S</Filter>
     </ClCompile>
+    <ClCompile Include="SetStallStartPacketHandler.cpp">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClCompile>
+    <ClCompile Include="SetStallDelPacketHandler.cpp">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChapStringPacketHandler.h">
@@ -251,6 +257,12 @@
     </ClInclude>
     <ClInclude Include="datatype.h">
       <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="SetStallStartPacketHandler.h">
+      <Filter>Packet Handlers\C -&gt; S</Filter>
+    </ClInclude>
+    <ClInclude Include="SetStallDelPacketHandler.h">
+      <Filter>Packet Handlers\S -&gt; C</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

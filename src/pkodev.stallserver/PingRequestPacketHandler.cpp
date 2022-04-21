@@ -45,7 +45,7 @@ namespace pkodev
 	bool PingRequestPacketHandler::handle(Bridge& bridge)
 	{
 		// Check that Game.exe is disconnected and trading in offline stall
-		if ( (bridge.game_connected() == false) && (bridge.player().offline_stall == true) )
+		if ( (bridge.game_connected() == false) && (bridge.player().set_stall == true) )
 		{
 			// Send ping response to the server
 			bridge.send_packet_gate(m_response);

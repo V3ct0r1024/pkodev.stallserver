@@ -44,7 +44,7 @@ namespace pkodev
 	bool SetStallClosePacketHandler::handle(Bridge& bridge)
 	{
 		// Reset the flag of set stall state
-		bridge.player().offline_stall = false;
+		bridge.player().set_stall = false;
 
 		// Pass the packet further
 		return true;

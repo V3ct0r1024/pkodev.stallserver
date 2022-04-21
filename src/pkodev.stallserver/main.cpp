@@ -214,19 +214,21 @@ bool LoadConfig(const std::string& path, pkodev::settings_t& settings)
 
         // Required parameters existence flag
         bool cfg_valid = (
-            (cfg.has("ToClient", "host")                == true) &&
-            (cfg.has("ToClient", "port")                == true) &&
-            (cfg.has("ToClient", "max_clients_per_ip")  == true) &&
-            (cfg.has("ToClient", "connection_interval") == true) &&
-            (cfg.has("ToClient", "max_player")          == true) &&
-            (cfg.has("ToGate",   "host")                == true) &&
-            (cfg.has("ToGate",   "port")                == true) &&
-            (cfg.has("ToGate",   "ip_mod")              == true) &&
-         /* (cfg.has("Map",      "map")                 == true) && */
-            (cfg.has("Game",     "max_stalls_per_ip")   == true) &&
-            (cfg.has("Game",     "max_offline_time")    == true)
+            (cfg.has("ToClient", "host")                 == true) &&
+            (cfg.has("ToClient", "port")                 == true) &&
+            (cfg.has("ToClient", "max_clients_per_ip")   == true) &&
+            (cfg.has("ToClient", "connection_interval")  == true) &&
+            (cfg.has("ToClient", "max_player")           == true) &&
+            (cfg.has("ToGate",   "host")                 == true) &&
+            (cfg.has("ToGate",   "port")                 == true) &&
+            (cfg.has("ToGate",   "ip_mod")               == true) &&
+         /* (cfg.has("Map",      "map")                  == true) && */
+            (cfg.has("Game",     "max_stalls_per_ip")    == true) &&
+            (cfg.has("Game",     "max_offline_time")     == true) &&
+            (cfg.has("Game",     "close_stall_on_empty") == true)
         );
 
+        
         // Check all required parameters
         if (cfg_valid == false)
         {
@@ -264,9 +266,10 @@ bool LoadConfig(const std::string& path, pkodev::settings_t& settings)
         }
 
         // Game logic settings
-        settings.max_stalls_per_ip = static_cast<unsigned short int>(cfg.get("Game", "max_stalls_per_ip", "0").to_integer());
-        settings.max_offline_time  = static_cast<unsigned int>(cfg.get("Game", "max_offline_time",  "0").to_integer());
-
+        settings.max_stalls_per_ip    = static_cast<unsigned short int>(cfg.get("Game", "max_stalls_per_ip", "0").to_integer());
+        settings.max_offline_time     = static_cast<unsigned int>(cfg.get("Game", "max_offline_time", "0").to_integer());
+        settings.close_stall_on_empty = static_cast<unsigned int>(cfg.get("Game", "close_stall_on_empty", "0").to_bool());
+        
         // Print a message that settings are loaded
         std::cout << "Settings successfully loaded!" << std::endl << std::endl;
 

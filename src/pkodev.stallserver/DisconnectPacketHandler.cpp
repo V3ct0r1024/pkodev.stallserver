@@ -44,7 +44,7 @@ namespace pkodev
 	bool DisconnectPacketHandler::handle(Bridge& bridge)
 	{
 		// Check that the player is in offline stall
-		if (bridge.player().offline_stall == true)
+		if (bridge.player().set_stall == true)
 		{
 			// Do not pass the packet further
 			return false;
