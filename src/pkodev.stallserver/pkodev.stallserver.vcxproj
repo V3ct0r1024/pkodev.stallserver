@@ -109,6 +109,7 @@
     <ClCompile Include="LoginPacket.cpp" />
     <ClCompile Include="LoginPacketHandler.cpp" />
     <ClCompile Include="LoginResultPacketHandler.cpp" />
+    <ClCompile Include="NoticeConsoleCommand.cpp" />
     <ClCompile Include="ObjectPool.cpp" />
     <ClCompile Include="Packet.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="LoginPacket.h" />
     <ClInclude Include="LoginPacketHandler.h" />
     <ClInclude Include="LoginResultPacketHandler.h" />
+    <ClInclude Include="NoticeConsoleCommand.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="PacketHandler.h" />

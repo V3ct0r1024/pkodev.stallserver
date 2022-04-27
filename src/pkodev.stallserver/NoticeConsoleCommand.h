@@ -3,19 +3,15 @@
 
 namespace pkodev
 {
-	// Stop server
-	class StopServerConsoleCommand final: public IConsoleCommand
+	class NoticeConsoleCommand final : public IConsoleCommand
 	{
 		public:
 
 			// Constructor
-			StopServerConsoleCommand();
-
-			// Constructor
-			StopServerConsoleCommand(const std::string& name);
+			NoticeConsoleCommand();
 
 			// Destructor
-			~StopServerConsoleCommand();
+			~NoticeConsoleCommand();
 
 			// Get command name
 			std::string name() const override;
@@ -26,12 +22,6 @@ namespace pkodev
 			// Execute the command
 			bool execute(const std::vector<std::string>& params, Server& server) override;
 
-		private:
-
-			// Command name
-			std::string m_name;
-
 	};
 }
-
 

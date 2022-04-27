@@ -31,6 +31,7 @@
 #include "HelpConsoleCommand.h"
 #include "DisconnectConsoleCommand.h"
 #include "StopServerConsoleCommand.h"
+#include "NoticeConsoleCommand.h"
 
 namespace pkodev
 {
@@ -322,8 +323,10 @@ namespace pkodev
 
 		// Create console commands
 		m_console_commands.emplace("stop", std::make_unique<StopServerConsoleCommand>());
+		m_console_commands.emplace("close", std::make_unique<StopServerConsoleCommand>("close"));
 		m_console_commands.emplace("disconnect", std::make_unique<DisconnectConsoleCommand>());
 		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
+		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>());
 	}
 
 	// Server destructor

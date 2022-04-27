@@ -4,7 +4,15 @@
 namespace pkodev
 {
 	// Constructor
-	StopServerConsoleCommand::StopServerConsoleCommand()
+	StopServerConsoleCommand::StopServerConsoleCommand() :
+		m_name("stop")
+	{
+
+	}
+
+	// Constructor
+	StopServerConsoleCommand::StopServerConsoleCommand(const std::string& name) :
+		m_name(name)
 	{
 
 	}
@@ -18,7 +26,7 @@ namespace pkodev
 	// Get command name
 	std::string StopServerConsoleCommand::name() const
 	{
-		return std::string("stop");
+		return m_name;
 	}
 
 	// Get command description
