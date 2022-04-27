@@ -328,6 +328,12 @@ namespace pkodev
 
 			// Disconnection flag
 			bool m_disconnecting;
+
+			// Reading flag
+			bool m_reading;
+
+			// Writing flag
+			bool m_writing;
 	};
 
 	// Network bridge class creator

@@ -51,7 +51,7 @@ namespace pkodev
 	Bridge::Bridge(Server& server) :
 		m_server(server),
 		m_event_base(nullptr),
-		m_disconnecting(false)
+		m_disconnecting(false), m_reading(false), m_writing(false)
 	{
 		// Set types of bridge sides
 		m_server_ctx.type = endpoint_type_t::gate;
@@ -84,8 +84,10 @@ namespace pkodev
 		m_server_ctx.address = gate;
 		m_server_ctx.connected = false;
 
-		// Not disconnecting
+		// Network state flags
 		m_disconnecting = false;
+		m_reading = false;
+		m_writing = false;
 
 		// Create an authorization timer
 		{
@@ -205,8 +207,10 @@ namespace pkodev
 			std::memset(reinterpret_cast<void*>(m_player_data.session_key), 0x00, sizeof(m_player_data.session_key));
 		}
 
-		// Reset disconnection flag
+		// Reset network flags
 		m_disconnecting = false;
+		m_reading = false;
+		m_writing = false;
 	}
 
 	// Connect to GateServer.exe
@@ -279,21 +283,28 @@ namespace pkodev
 				// Lock the bridge
 				std::lock_guard<std::recursive_mutex> lock(bridge.m_mtx);
 
-				// References to client and server data structures
-				endpoint& client = bridge.m_client_ctx;
-				endpoint& server = bridge.m_server_ctx;
+				// Check that bridge is disconnecting
+				if (bridge.m_disconnecting == true)
+				{
+					// Close the connection with Game.exe
+					bridge.on_disconnect(endpoint_type_t::game);
+					return;
+				}
 
 				// Check socket read event
 				if (what & EV_READ)
 				{
 					// Handle the read event
-					const bool ret = bridge.on_read(server, client);
+					bridge.m_reading = true;
+					const bool ret = bridge.on_read(bridge.m_server_ctx, bridge.m_client_ctx);
+					bridge.m_reading = false;
 
 					// Check if the event was successfully handled
 					if (ret == false)
 					{
 						// Close the connection with Game.exe
 						bridge.on_disconnect(endpoint_type_t::game);
+						return;
 					}
 				}
 
@@ -301,13 +312,16 @@ namespace pkodev
 				if (what & EV_WRITE)
 				{
 					// Handle the write event
-					const bool ret = bridge.on_write(client, server);
+					bridge.m_writing = true;
+					const bool ret = bridge.on_write(bridge.m_client_ctx, bridge.m_server_ctx);
+					bridge.m_writing = false;
 
 					// Check if the event was successfully handled
 					if (ret == false)
 					{
 						// Close the connection with Game.exe
 						bridge.on_disconnect(endpoint_type_t::game);
+						return;
 					}
 				}
 			}
@@ -330,21 +344,28 @@ namespace pkodev
 				// Lock the bridge
 				std::lock_guard<std::recursive_mutex> lock(bridge.m_mtx);
 
-				// References to client and server data structures
-				endpoint& client = bridge.m_client_ctx;
-				endpoint& server = bridge.m_server_ctx;
+				// Check that bridge is disconnecting
+				if (bridge.m_disconnecting == true)
+				{
+					// Close the connection with GateServer.exe
+					bridge.on_disconnect(endpoint_type_t::gate);
+					return;
+				}
 
 				// Check socket read event
 				if (what & EV_READ)
 				{
 					// Handle the read event
-					const bool ret = bridge.on_read(client, server);
+					bridge.m_reading = true;
+					const bool ret = bridge.on_read(bridge.m_client_ctx, bridge.m_server_ctx);
+					bridge.m_reading = false;
 
 					// Check if the event was successfully handled
 					if (ret == false)
 					{
 						// Close the connection with GateServer.exe
 						bridge.on_disconnect(endpoint_type_t::gate);
+						return;
 					}
 				}
 
@@ -352,10 +373,10 @@ namespace pkodev
 				if (what & EV_WRITE)
 				{
 					// Check that the connection to GateServer.exe is in progress
-					if (server.connected == false)
+					if (bridge.m_server_ctx.connected == false)
 					{
 						// GateServer.exe socket error code
-						const int error = utils::network::get_socket_error(server.socket);
+						const int error = utils::network::get_socket_error(bridge.m_server_ctx.socket);
 
 						// Check that GateServer.exe connected without errors
 						if (error == 0)
@@ -368,6 +389,7 @@ namespace pkodev
 							{
 								// Close the connection with GateServer.exe
 								bridge.on_disconnect(endpoint_type_t::gate);
+								return;
 							}
 						}
 						else
@@ -377,18 +399,22 @@ namespace pkodev
 						
 							// Close the connection with Game.exe
 							bridge.on_disconnect(endpoint_type_t::game);
+							return;
 						}
 					}
 					else
 					{
 						// Handle the write event
-						const bool ret = bridge.on_write(server, client);
+						bridge.m_writing = true;
+						const bool ret = bridge.on_write(bridge.m_server_ctx, bridge.m_client_ctx);
+						bridge.m_writing = false;
 
 						// Check if the event was successfully handled
 						if (ret == false)
 						{
 							// Close the connection with GateServer.exe
 							bridge.on_disconnect(endpoint_type_t::gate);
+							return;
 						}
 					}
 				}
@@ -467,7 +493,25 @@ namespace pkodev
 	// Disconnect from GateServer.exe
 	void Bridge::disconnect()
 	{
+		// Lock the bridge
+		std::lock_guard<std::recursive_mutex> lock(m_mtx);
+
+		// Wait for disconnection
 		m_disconnecting = true;
+
+		// Check current network state
+		if (m_reading == false && m_writing == false)
+		{
+			// Close the connection right now
+			const int ret = event_add(m_server_ctx.write_event, nullptr);
+
+			// Check the result
+			if (ret == -1)
+			{
+				// Failed to add event
+				Logger::Instance().log("Failed to add write event to disconnect the client!");
+			}
+		}
 	}
 
 	// Update packet encryption keys
@@ -897,13 +941,6 @@ namespace pkodev
 	// Socket write event
 	bool Bridge::on_write(endpoint& to, endpoint& from)
 	{
-		// Check that bridge is in disconnecting state
-		if (m_disconnecting == true)
-		{
-			// Close the bridge
-			return false;
-		}
-
 		// Write the data from output buffer to socket
 		try
 		{
