@@ -34,6 +34,9 @@
     <Filter Include="Server">
       <UniqueIdentifier>{48ace4e3-1cf3-49d6-a492-5a1f56a87016}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Console Commands">
+      <UniqueIdentifier>{3785fb9e-29ab-4571-902d-a8d6e2388a9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChapStringPacketHandler.cpp">
@@ -147,6 +150,15 @@
     </ClCompile>
     <ClCompile Include="SetStallDelPacketHandler.cpp">
       <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClCompile>
+    <ClCompile Include="DisconnectConsoleCommand.cpp">
+      <Filter>Console Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="HelpConsoleCommand.cpp">
+      <Filter>Console Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="StopServerConsoleCommand.cpp">
+      <Filter>Console Commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -263,6 +275,18 @@
     </ClInclude>
     <ClInclude Include="SetStallDelPacketHandler.h">
       <Filter>Packet Handlers\S -&gt; C</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleCommand.h">
+      <Filter>Console Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="DisconnectConsoleCommand.h">
+      <Filter>Console Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="HelpConsoleCommand.h">
+      <Filter>Console Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="StopServerConsoleCommand.h">
+      <Filter>Console Commands</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

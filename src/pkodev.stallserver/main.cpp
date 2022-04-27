@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         // Print a message that the server is running now
         std::cout << "Server successfully started on address " 
                   << settings.game_host << ":" << settings.game_port << "!" << std::endl;
-        std::cout << "Type '/stop' to stop the server. " << std::endl;
+        std::cout << "Type '/stop' to stop the server or '/help' to see a list of available commands." << std::endl;
 
         // Accept commands from the user
         while (server.is_running() == true)
@@ -107,16 +107,16 @@ int main(int argc, char *argv[])
                 std::cin.clear();
                 continue;
             }
-            
-            // Check that the user entered '/stop' command to stop the server
-            if (command.compare("/stop") == 0)
+
+            // Check that command line is not empty
+            if (command.empty() == true)
             {
-                // Exit the loop
-                break;
+                // Skip the command
+                continue;
             }
 
-            // User enetered an unknown command
-            std::cout << "Unknown command!" << std::endl;
+            // Try to execute the command
+            server.execute_cmd(command);
         }
 
         // Print a message that the server is stopping
@@ -146,7 +146,7 @@ void Welcome()
 {
     std::cout << "Stall Server version 4.0" << std::endl;
     std::cout << "* Author: V3ct0r from PKODev.NET" << std::endl;
-    std::cout << "* Date: 09/20/2021" << std::endl;
+    std::cout << "* Date: 04/27/2022" << std::endl;
     std::cout << "* URL: https://pkodev.net/profile/3-v3ct0r/" << std::endl << std::endl;
     std::cout << "libevent version: " << event_get_version() << std::endl << std::endl;
 }
@@ -158,7 +158,7 @@ bool InitLogger()
     const std::string dir("logs");
 
     // Security descriptor
-    SECURITY_ATTRIBUTES Attrib;
+    SECURITY_ATTRIBUTES Attrib{0x00};
     Attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
     Attrib.lpSecurityDescriptor = NULL;
     Attrib.bInheritHandle = false;
@@ -175,7 +175,7 @@ bool InitLogger()
     }
 
     // Get system time
-    tm timeinfo = pkodev::utils::time::system_time();
+    const tm timeinfo = pkodev::utils::time::system_time();
 
     // Make a path to a log file
     char path[256]{ 0x00 };
@@ -227,7 +227,6 @@ bool LoadConfig(const std::string& path, pkodev::settings_t& settings)
             (cfg.has("Game",     "max_offline_time")     == true) &&
             (cfg.has("Game",     "close_stall_on_empty") == true)
         );
-
         
         // Check all required parameters
         if (cfg_valid == false)

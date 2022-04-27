@@ -712,7 +712,7 @@ namespace pkodev
 					if (m_handlers->check_handler(packet_id) == true)
 					{
 						// Get a pointer to the handler
-						auto handler = m_handlers->get_handler(packet_id);
+						const auto& handler = m_handlers->get_handler(packet_id);
 
 						// Read the packet
 						handler->read(packet_size, *(from.in_buf));

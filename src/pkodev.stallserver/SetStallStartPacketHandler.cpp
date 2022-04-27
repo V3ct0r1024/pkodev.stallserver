@@ -48,7 +48,7 @@ namespace pkodev
 		const unsigned short int grids = static_cast<unsigned short int>(buffer.read_uint8());
 
 		// Read grids
-		for (unsigned int i = 0; i < min(grids, 18); ++i)
+		for (unsigned int i = 0; i < static_cast<unsigned int>(min(grids, 18)); ++i)
 		{
 			// Skip 5 byte (grid and money)
 			buffer.seek_read(5, LinearBuffer::seek_type::current);

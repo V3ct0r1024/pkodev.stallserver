@@ -9,7 +9,7 @@
 namespace pkodev
 {
 	// Data type for storing a smart pointer to a packet handler
-	typedef std::shared_ptr<IPacketHandler> handler_ptr_t;
+	typedef std::unique_ptr<IPacketHandler> handler_ptr_t;
 
 	// Data type for storing packet handlers
 	typedef std::map<unsigned short int, handler_ptr_t> handler_list_t;
@@ -53,7 +53,7 @@ namespace pkodev
 			PacketHandlerStorage& operator=(PacketHandlerStorage&&) = delete;
 
 			// Add packet handler to the repository
-			void add_handler(handler_ptr_t&& handler);
+			bool add_handler(handler_ptr_t&& handler);
 
 			// Remove packet handler from repository by pointer
 			void remove_handler(handler_ptr_t& handler);

@@ -93,8 +93,10 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="BridgeList.cpp" />
     <ClCompile Include="ChapStringPacketHandler.cpp" />
+    <ClCompile Include="DisconnectConsoleCommand.cpp" />
     <ClCompile Include="DisconnectPacket.cpp" />
     <ClCompile Include="FriendInvitePacketHandler.cpp" />
+    <ClCompile Include="HelpConsoleCommand.cpp" />
     <ClCompile Include="IpAddressBook.cpp" />
     <ClCompile Include="CommEncrypt.cpp" />
     <ClCompile Include="ConfigFile.cpp" />
@@ -122,6 +124,7 @@
     <ClCompile Include="SetStallDelPacketHandler.cpp" />
     <ClCompile Include="SetStallStartPacketHandler.cpp" />
     <ClCompile Include="SetStallSuccessPacketHandler.cpp" />
+    <ClCompile Include="StopServerConsoleCommand.cpp" />
     <ClCompile Include="SystemNoticePacket.cpp" />
     <ClCompile Include="TalkSessionCreatePacketHandler.cpp" />
     <ClCompile Include="TeamInvitePacketHandler.cpp" />
@@ -134,8 +137,11 @@
     <ClInclude Include="BridgeList.h" />
     <ClInclude Include="ChapStringPacketHandler.h" />
     <ClInclude Include="datatype.h" />
+    <ClInclude Include="DisconnectConsoleCommand.h" />
     <ClInclude Include="DisconnectPacket.h" />
     <ClInclude Include="FriendInvitePacketHandler.h" />
+    <ClInclude Include="ConsoleCommand.h" />
+    <ClInclude Include="HelpConsoleCommand.h" />
     <ClInclude Include="IpAddressBook.h" />
     <ClInclude Include="CommEncrypt.h" />
     <ClInclude Include="ConfigFile.h" />
@@ -162,6 +168,7 @@
     <ClInclude Include="SetStallDelPacketHandler.h" />
     <ClInclude Include="SetStallStartPacketHandler.h" />
     <ClInclude Include="SetStallSuccessPacketHandler.h" />
+    <ClInclude Include="StopServerConsoleCommand.h" />
     <ClInclude Include="SystemNoticePacket.h" />
     <ClInclude Include="TalkSessionCreatePacketHandler.h" />
     <ClInclude Include="TeamInvitePacketHandler.h" />

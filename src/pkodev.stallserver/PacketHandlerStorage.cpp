@@ -16,18 +16,14 @@ namespace pkodev
 	}
 
 	// Add packet handler
-	void PacketHandlerStorage::add_handler(handler_ptr_t&& handler)
+	bool PacketHandlerStorage::add_handler(handler_ptr_t&& handler)
 	{
-		// Check that the handler does not exist in the repository yet
-		if (check_handler(handler->id()) == false)
-		{
-			// Add the handler to the repository
-			m_handlers.insert(
-				std::make_pair<unsigned short int, handler_ptr_t>(
-					handler->id(), std::move(handler)
-				)
-			);
-		}
+		// Add the handler to the repository
+		return m_handlers.insert(
+			std::make_pair<unsigned short int, handler_ptr_t>(
+				handler->id(), std::move(handler)
+			)
+		).second;
 	}
 
 	// Remove packet handler from repository by pointer
@@ -40,7 +36,7 @@ namespace pkodev
 	void PacketHandlerStorage::remove_handler(unsigned short int packet_id)
 	{
 		// Look for the handler in the repository
-		auto it = m_handlers.find(packet_id);
+		const auto it = m_handlers.find(packet_id);
 
 		// Check that the handler was found
 		if (it != m_handlers.end())
@@ -54,7 +50,7 @@ namespace pkodev
 	const handler_ptr_t& PacketHandlerStorage::get_handler(unsigned short int packet_id) const
 	{
 		// Look for the handler in the repository
-		auto it = m_handlers.find(packet_id);
+		const auto it = m_handlers.find(packet_id);
 
 		// Check that the handler was found
 		if (it == m_handlers.end())

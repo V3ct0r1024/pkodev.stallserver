@@ -28,13 +28,17 @@
 #include "TeamInvitePacketHandler.h"
 #include "TalkSessionCreatePacketHandler.h"
 
+#include "HelpConsoleCommand.h"
+#include "DisconnectConsoleCommand.h"
+#include "StopServerConsoleCommand.h"
+
 namespace pkodev
 {
 	// Class instance counter
 	std::size_t Server::instance_counter = 0;
 
 	// Packet handlers list output flag
-	bool Server::worker::handlers_log = false;
+	std::atomic_bool Server::worker::handlers_log = false;
 
 
 	// Server initializer constructor
@@ -71,35 +75,33 @@ namespace pkodev
 	Server::worker::worker(event_base* base, std::thread&& th) :
 		evbase(base), 
 		th(std::move(th)), 
-		event_count(0),
-		out_lock(std::make_shared<std::recursive_mutex>()),
-		data_lock(std::make_shared<std::recursive_mutex>())
+		event_count(0)
 	{
 		// Create a list of network packets handlers
-		handlers = std::make_shared<PacketHandlerStorage>();
+		handlers = std::make_unique<PacketHandlerStorage>();
 
 		// S -> C
-		handlers->add_handler(std::make_shared<ChapStringPacketHandler>());
-		handlers->add_handler(std::make_shared<LoginResultPacketHandler>());
-		handlers->add_handler(std::make_shared<EnterMapPacketHandler>());
-		handlers->add_handler(std::make_shared<SetStallSuccessPacketHandler>());
-		handlers->add_handler(std::make_shared<SetStallDelPacketHandler>());
-		handlers->add_handler(std::make_shared<PingRequestPacketHandler>());
+		handlers->add_handler(std::make_unique<ChapStringPacketHandler>());
+		handlers->add_handler(std::make_unique<LoginResultPacketHandler>());
+		handlers->add_handler(std::make_unique<EnterMapPacketHandler>());
+		handlers->add_handler(std::make_unique<SetStallSuccessPacketHandler>());
+		handlers->add_handler(std::make_unique<SetStallDelPacketHandler>());
+		handlers->add_handler(std::make_unique<PingRequestPacketHandler>());
 		
 		// C -> S
-		handlers->add_handler(std::make_shared<LoginPacketHandler>());
-		handlers->add_handler(std::make_shared<CreatePinPacketHandler>());
-		handlers->add_handler(std::make_shared<UpdatePinPacketHandler>());
-		handlers->add_handler(std::make_shared<DisconnectPacketHandler>());
-		handlers->add_handler(std::make_shared<SetStallClosePacketHandler>());
-		handlers->add_handler(std::make_shared<PersonalMessagePacketHandler>());
-		handlers->add_handler(std::make_shared<FriendInvitePacketHandler>());
-		handlers->add_handler(std::make_shared<TeamInvitePacketHandler>());
-		handlers->add_handler(std::make_shared<TalkSessionCreatePacketHandler>());
-		handlers->add_handler(std::make_shared<SetStallStartPacketHandler>());
+		handlers->add_handler(std::make_unique<LoginPacketHandler>());
+		handlers->add_handler(std::make_unique<CreatePinPacketHandler>());
+		handlers->add_handler(std::make_unique<UpdatePinPacketHandler>());
+		handlers->add_handler(std::make_unique<DisconnectPacketHandler>());
+		handlers->add_handler(std::make_unique<SetStallClosePacketHandler>());
+		handlers->add_handler(std::make_unique<PersonalMessagePacketHandler>());
+		handlers->add_handler(std::make_unique<FriendInvitePacketHandler>());
+		handlers->add_handler(std::make_unique<TeamInvitePacketHandler>());
+		handlers->add_handler(std::make_unique<TalkSessionCreatePacketHandler>());
+		handlers->add_handler(std::make_unique<SetStallStartPacketHandler>());
 
 		// Print the list of registered handlers to the log
-		if (handlers_log == false)
+		if (handlers_log.load() == false)
 		{
 			// Raise the flag
 			handlers_log = true;
@@ -229,9 +231,7 @@ namespace pkodev
 		evbase(w.evbase), 
 		th(std::move(w.th)),
 		event_count(w.event_count.load()),
-		handlers(std::move(w.handlers)),
-		out_lock(std::move(w.out_lock)),
-		data_lock(std::move(w.data_lock))
+		handlers(std::move(w.handlers))
 	{
 
 	}
@@ -251,7 +251,7 @@ namespace pkodev
 		if (Server::instance_counter++ == 0)
 		{
 			// Make libevent threadsafe
-			int ret = evthread_use_windows_threads();
+			const int ret = evthread_use_windows_threads();
 
 			// Check that evthread_use_windows_threads() failed
 			if (ret == -1)
@@ -319,6 +319,11 @@ namespace pkodev
 				}
 			);
 		}
+
+		// Create console commands
+		m_console_commands.emplace("stop", std::make_unique<StopServerConsoleCommand>());
+		m_console_commands.emplace("disconnect", std::make_unique<DisconnectConsoleCommand>());
+		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
 	}
 
 	// Server destructor
@@ -376,7 +381,7 @@ namespace pkodev
 			std::memset(reinterpret_cast<void*>(&wsaData), 0x00, sizeof(wsaData));
 
 			// Load WinSock 2.2 library
-			int ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
+			const int ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
 			// Check the result
 			if (ret != 0)
@@ -402,7 +407,7 @@ namespace pkodev
 			Logger::Instance().log("Clearing Winsock . . .");
 
 			// Release WinSock 2.2 library
-			int ret = WSACleanup();
+			const int ret = WSACleanup();
 
 			// Check the result
 			if (ret != 0)
@@ -481,7 +486,7 @@ namespace pkodev
 		m_workers_stop = false;
 
 		// Get the amount of available worker threads
-		std::size_t count = static_cast<std::size_t>(
+		const std::size_t count = static_cast<std::size_t>(
 			max(2, std::thread::hardware_concurrency())
 		);
 
@@ -604,7 +609,7 @@ namespace pkodev
 		// Fill in the local address structure
 		local.sin_family = AF_INET;
 		local.sin_port = htons(m_cfg.game_port);
-		int ret = inet_pton(AF_INET, m_cfg.game_host.c_str(), &local.sin_addr);
+		const int ret = inet_pton(AF_INET, m_cfg.game_host.c_str(), &local.sin_addr);
 
 		// Check the result of the inet_pton() function
 		if (ret == SOCKET_ERROR)
@@ -628,7 +633,7 @@ namespace pkodev
 				try
 				{
 					// Accept the incoming connection
-					bool ret = reinterpret_cast<Server*>(ctx)->handle_accept(fd, address);
+					const bool ret = reinterpret_cast<Server*>(ctx)->handle_accept(fd, address);
 
 					// Check the result
 					if (ret == false)
@@ -776,7 +781,73 @@ namespace pkodev
 		// Write a log
 		Logger::Instance().log("The server stopped!");
 	}
-	
+
+	// Execute a command
+	void Server::execute_cmd(const std::string& cmd)
+	{
+		/*
+			/stop - Stop the server
+			/stat - Print statistics
+			/disconnect all|offline - Disconnect clients
+			/notice message - Send a message to clients in system chat channel
+			/help - Show available commands
+		*/
+
+		// Trim whitespaces
+		std::string raw = utils::string::trim(cmd);
+
+		// Check that given string is not empty
+		if (raw.empty() == true)
+		{
+			// The command is empty
+			return;
+		}
+
+		// Check that command has '/' symbol at the beginning
+		if (raw.front() != '/')
+		{
+			// The wrong command format
+			return;
+		}
+
+		// Remove the '/' symbol
+		raw.erase(0, 1);
+
+		// Split the command line with spaces
+		std::vector<std::string> params;
+		pkodev::utils::string::split(raw, params, ' ');
+
+		// Check substrings number
+		if (params.size() > 0)
+		{
+			// Get command name
+			const std::string command = pkodev::utils::string::lower_case(params[0]);
+
+			// Remove command 
+			params.erase(params.begin());
+
+			// Search the command handler
+			const auto it = m_console_commands.find(command);
+
+			// Check that command is found
+			if (it != m_console_commands.end())
+			{
+				// Execute the command
+				const bool ret = it->second->execute(params, *this);
+
+				// Check the result
+				if (ret == false)
+				{
+					std::cout << "Command failed!" << std::endl;
+				}
+			}
+			else
+			{
+				// Unknown command
+				std::cout << "'/" << command << "': Unknown command!" << std::endl;
+			}
+		}
+	}
 
 	// Accept incoming connection
 	bool Server::handle_accept(evutil_socket_t fd, sockaddr* address)
@@ -792,8 +863,8 @@ namespace pkodev
 			}
 
 			// Get the IP address and port of the client
-			std::string ip_address = utils::network::get_ip_address(address);
-			unsigned short int port = utils::network::get_port(address);
+			const std::string ip_address = utils::network::get_ip_address(address);
+			const unsigned short int port = utils::network::get_port(address);
 
 			// Check the IP address and port of the client
 			if ( (ip_address.empty() == true) || (port == 0) )
@@ -851,7 +922,7 @@ namespace pkodev
 				{ m_cfg.gate_host, m_cfg.gate_port }
 			);
 
-			// Start connection to GateServer.exe
+			// Start connecting to GateServer.exe
 			bridge_ptr->connect();
 			
 			// The bridge is created, add it to the list of bridges
@@ -955,7 +1026,7 @@ namespace pkodev
 	void Server::add_bridge(Bridge* bridge)
 	{
 		// Add a bridge to the list
-		bool ret = m_connected_bridges.add(bridge);
+		const bool ret = m_connected_bridges.add(bridge);
 
 		// Check the result
 		if (ret == true)
@@ -974,7 +1045,7 @@ namespace pkodev
 	void Server::remove_bridge(Bridge* bridge)
 	{
 		// Remove a bridge from the list
-		bool ret = m_connected_bridges.remove(bridge);
+		const bool ret = m_connected_bridges.remove(bridge);
 
 		// Check the result
 		if (ret == true)

@@ -204,6 +204,55 @@ namespace pkodev
 		return left_trim(right_trim(str, whitespace), whitespace);
 	}
 
+	// Split a string by a delimiter
+	void utils::string::split(const std::string& str,
+		std::vector<std::string>& substrings, const char delimiter)
+	{
+		// Cleat the list list of substrings
+		substrings.clear();
+
+		// Check that string is not empty
+		if (str.empty() == true)
+		{
+			// Do nothing
+			return;
+		}
+		// The delimiter position
+		std::size_t pos = str.find(delimiter);
+		std::size_t start = 0;
+
+		// Check that delimiter exsists
+		if (pos == std::string::npos)
+		{
+			// Add the whole string to the substring
+			substrings.push_back(str);
+			return;
+		}
+
+		// Loop over the string
+		do
+		{
+			// Get a substring
+			std::string substring = str.substr(start, pos - start);
+			
+			// Add the substring to the list
+			substrings.push_back(substring);
+			
+			// Increase the start position
+			start = pos + 1;
+
+			// Update the next position
+			pos = str.find(delimiter, start);
+		} 
+		while (pos != std::string::npos);
+
+		// Add the latest substring
+		if (start != str.length())
+		{
+			substrings.push_back(str.substr(start, pos - str.length()));
+		}
+	}
+
 	// Extract filename from path
 	std::string utils::file::extract_filename(const std::string& path)
 	{
@@ -275,7 +324,7 @@ namespace pkodev
 	// Convert time in milliseconds to a timeval structure
 	timeval utils::time::timeval_from_msec(unsigned long long milliseconds)
 	{
-		timeval ret;
+		timeval ret{0,0};
 		const unsigned long long microseconds = milliseconds * 1000;
 
 		ret.tv_sec = static_cast<long>(microseconds / 1000000);

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <ctime>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -60,6 +61,8 @@ namespace pkodev
 				// Remove leading and trailing whitespace from a string
 				static std::string trim(const std::string& str, const std::string& whitespace = " \t");
 
+				// Split a string by a delimiter
+				static void split(const std::string& str, std::vector<std::string>& substrings, const char delimiter = ' ');
 		};
 
 		// File functions

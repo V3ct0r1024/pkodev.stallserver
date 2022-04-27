@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <map>
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -15,6 +16,7 @@
 #include "PacketHandlerStorage.h"
 #include "IpAddressBook.h"
 #include "BridgeList.h"
+#include "ConsoleCommand.h"
 
 namespace pkodev
 {
@@ -24,6 +26,9 @@ namespace pkodev
 
 	// Define the type of the list of maps on which the system of offline stalls works
 	typedef std::vector<std::string> map_list_t;
+
+	// Define the type of the list of console commands
+	typedef std::map< std::string, std::unique_ptr<IConsoleCommand> > console_command_list_t;
 
 	// Stall server exception
 	class server_exception final : public std::runtime_error
@@ -106,6 +111,9 @@ namespace pkodev
 			// Stop the server
 			void stop();
 
+			// Execute a command
+			void execute_cmd(const std::string& cmd);
+
 			// Get a reference to the server settings structure
 			inline const settings_t& settings() const { return m_cfg; }
 
@@ -118,6 +126,8 @@ namespace pkodev
 			// Get a list of network bridges in offline stall mode
 			inline BridgeList& offline_bridges() { return m_offline_stall_bridges; }
 
+			// Get a list of console commands
+			inline const console_command_list_t& console_commands() const { return m_console_commands; }
 
 		private:
 
@@ -149,7 +159,7 @@ namespace pkodev
 			struct worker final
 			{
 				// Packet handlers list output flag
-				static bool handlers_log;
+				static std::atomic_bool handlers_log;
 
 				// Event base
 				event_base* evbase;
@@ -162,12 +172,6 @@ namespace pkodev
 
 				// Packet handlers
 				std::shared_ptr<PacketHandlerStorage> handlers;
-
-				// A lock for output and disconnection operations
-				std::shared_ptr<std::recursive_mutex> out_lock;
-
-				// A lock for player-related data
-				std::shared_ptr<std::recursive_mutex> data_lock;
 
 
 				// Constructor
@@ -253,5 +257,8 @@ namespace pkodev
 
 			// List of connected IP addresses
 			IpAddressBook m_ip_book;
+
+			// Adminitstrator commands
+			console_command_list_t m_console_commands;
 	};
 }
