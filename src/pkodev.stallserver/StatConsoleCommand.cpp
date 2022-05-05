@@ -53,7 +53,7 @@ namespace pkodev
 		const auto uptime = duration_cast<seconds>(system_clock::now() - server.startup_time()).count();
 
 
-		// Print statistrics
+		// Print statistics
 		std::cout << "Server statistics" << std::endl;
 		std::cout << "* Uptime: "            << uptime << " seconds"                            << std::endl;
 		std::cout << "* Clients connected: " << clients_counter << " / " << settings.max_player << std::endl;

@@ -33,6 +33,8 @@
 #include "StopServerConsoleCommand.h"
 #include "NoticeConsoleCommand.h"
 #include "StatConsoleCommand.h"
+#include "KickConsoleCommand.h"
+
 
 namespace pkodev
 {
@@ -332,6 +334,7 @@ namespace pkodev
 		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
 		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>());
 		m_console_commands.emplace("stat", std::make_unique<StatConsoleCommand>());
+		m_console_commands.emplace("kick", std::make_unique<KickConsoleCommand>());
 	}
 
 	// Server destructor
