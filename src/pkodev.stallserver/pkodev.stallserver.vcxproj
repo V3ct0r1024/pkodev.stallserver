@@ -125,6 +125,7 @@
     <ClCompile Include="SetStallDelPacketHandler.cpp" />
     <ClCompile Include="SetStallStartPacketHandler.cpp" />
     <ClCompile Include="SetStallSuccessPacketHandler.cpp" />
+    <ClCompile Include="StatConsoleCommand.cpp" />
     <ClCompile Include="StopServerConsoleCommand.cpp" />
     <ClCompile Include="SystemNoticePacket.cpp" />
     <ClCompile Include="TalkSessionCreatePacketHandler.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="SetStallDelPacketHandler.h" />
     <ClInclude Include="SetStallStartPacketHandler.h" />
     <ClInclude Include="SetStallSuccessPacketHandler.h" />
+    <ClInclude Include="StatConsoleCommand.h" />
     <ClInclude Include="StopServerConsoleCommand.h" />
     <ClInclude Include="SystemNoticePacket.h" />
     <ClInclude Include="TalkSessionCreatePacketHandler.h" />

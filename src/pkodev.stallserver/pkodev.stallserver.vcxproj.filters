@@ -163,6 +163,9 @@
     <ClCompile Include="NoticeConsoleCommand.cpp">
       <Filter>Console Commands</Filter>
     </ClCompile>
+    <ClCompile Include="StatConsoleCommand.cpp">
+      <Filter>Console Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChapStringPacketHandler.h">
@@ -292,6 +295,9 @@
       <Filter>Console Commands</Filter>
     </ClInclude>
     <ClInclude Include="NoticeConsoleCommand.h">
+      <Filter>Console Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="StatConsoleCommand.h">
       <Filter>Console Commands</Filter>
     </ClInclude>
   </ItemGroup>

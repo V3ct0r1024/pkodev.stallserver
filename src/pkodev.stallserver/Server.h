@@ -82,6 +82,36 @@ namespace pkodev
 		}
 	};
 
+	// Structure with worker information
+	struct worker_info_t final
+	{
+		// Thread ID
+		std::thread::id thread_id;
+
+		// Number of tasks
+		unsigned int tasks;
+
+		// Max operation time
+		unsigned long long max_time;
+
+		// Constructor
+		worker_info_t() :
+			tasks(0),
+			max_time(0)
+		{
+
+		}
+
+		// Constructor
+		worker_info_t(const std::thread::id& thread_id_, unsigned int tasks_, unsigned long long max_time_) :
+			thread_id(thread_id_),
+			tasks(tasks_),
+			max_time(max_time_)
+		{
+
+		}
+	};
+
 	// Server class
 	class Server final
 	{
@@ -129,6 +159,12 @@ namespace pkodev
 			// Get a list of console commands
 			inline const console_command_list_t& console_commands() const { return m_console_commands; }
 
+			// Get a list of workers information
+			const std::vector<worker_info_t> make_worker_info() const;
+
+			// Get startup time
+			inline const std::chrono::system_clock::time_point& startup_time() const { return m_startup_time; }
+
 		private:
 
 			friend class Bridge;
@@ -168,7 +204,10 @@ namespace pkodev
 				std::thread th;
 
 				// Number of tasks
-				std::atomic_int event_count;
+				std::atomic_uint event_count;
+
+				// Max operation time (microseconds)
+				std::atomic_ullong max_time;
 
 				// Packet handlers
 				std::shared_ptr<PacketHandlerStorage> handlers;
@@ -215,9 +254,6 @@ namespace pkodev
 			// Find the worker with the least number of tasks
 			worker& get_min_worker();
 
-			// Add a network bridge to the list
-			void add_bridge(Bridge* bridge);
-
 			// Remove a network bridge from the list
 			void remove_bridge(Bridge* bridge);
 
@@ -234,14 +270,17 @@ namespace pkodev
 			// Is the server running?
 			bool m_running;
 
+			// Server startup time
+			std::chrono::system_clock::time_point m_startup_time;
+
 			// List of worker threads
 			std::vector<worker> m_workers;
 
 			// Are all worker threads running?
-			std::atomic<bool> m_workers_ready;
+			std::atomic_bool m_workers_ready;
 
 			// Should worker threads be stopped?
-			std::atomic<bool> m_workers_stop;
+			std::atomic_bool m_workers_stop;
 
 			// Object for listening to incoming connections
 			evconnlistener* m_listener;

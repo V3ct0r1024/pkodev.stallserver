@@ -8,7 +8,7 @@
 
 #include <algorithm>
 #include <functional>
-#include <ctime>
+#include <chrono>
 
 #include "ChapStringPacketHandler.h"
 #include "LoginResultPacketHandler.h"
@@ -32,6 +32,7 @@
 #include "DisconnectConsoleCommand.h"
 #include "StopServerConsoleCommand.h"
 #include "NoticeConsoleCommand.h"
+#include "StatConsoleCommand.h"
 
 namespace pkodev
 {
@@ -76,7 +77,8 @@ namespace pkodev
 	Server::worker::worker(event_base* base, std::thread&& th) :
 		evbase(base), 
 		th(std::move(th)), 
-		event_count(0)
+		event_count(0),
+		max_time(0)
 	{
 		// Create a list of network packets handlers
 		handlers = std::make_unique<PacketHandlerStorage>();
@@ -232,6 +234,7 @@ namespace pkodev
 		evbase(w.evbase), 
 		th(std::move(w.th)),
 		event_count(w.event_count.load()),
+		max_time(w.max_time.load()),
 		handlers(std::move(w.handlers))
 	{
 
@@ -245,6 +248,7 @@ namespace pkodev
 	Server::Server(const settings_t& settings_) :
 		m_cfg(settings_),
 		m_running(false), 
+		m_startup_time({}),
 		m_workers_ready(false), m_workers_stop(false),
 		m_listener(nullptr)
 	{
@@ -327,6 +331,7 @@ namespace pkodev
 		m_console_commands.emplace("disconnect", std::make_unique<DisconnectConsoleCommand>());
 		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
 		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>());
+		m_console_commands.emplace("stat", std::make_unique<StatConsoleCommand>());
 	}
 
 	// Server destructor
@@ -744,6 +749,9 @@ namespace pkodev
 		// The server is started
 		m_running = true;
 
+		// Get startup time
+		m_startup_time = std::chrono::system_clock::now();
+
 		// Write a log
 		Logger::Instance().log("Server started!");
 	}
@@ -928,11 +936,27 @@ namespace pkodev
 			// Start connecting to GateServer.exe
 			bridge_ptr->connect();
 			
-			// The bridge is created, add it to the list of bridges
-			add_bridge(bridge_ptr.release());
+			// Add a bridge to the list
+			const bool ret = m_connected_bridges.add(bridge_ptr.get());
+
+			// Check the result
+			if (ret == true)
+			{
+				// Add client IP address to address list
+				m_ip_book.register_ip(bridge_ptr->game_address().ip);
+			}
+			else
+			{
+				// Failed to add the bridge to the list?
+				Logger::Instance().log("Server::add_bridge(): Failed to add a bridge to the list!");
+				return false;
+			}
 
 			// Increase the task counter for the current worker
 			++w.event_count;
+
+			// Do not delete the bridge, just release the pointer
+			bridge_ptr.release();
 
 			// Connection successfully accepted
 			return true;
@@ -1019,28 +1043,25 @@ namespace pkodev
 		{
 			while (event_base_got_break(w->evbase) == false)
 			{
+				// Start measure operation time
+				auto start = std::chrono::steady_clock::now();
+
+				// Handle events
 				event_base_loop(w->evbase, EVLOOP_NONBLOCK);
+
+				// Stop measure operation time
+				auto end = std::chrono::steady_clock::now();
+
+				// Calculate time difference in microseconds
+				unsigned long long diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+				// Get max operation time
+				unsigned long long max_time = w->max_time.load();
+				w->max_time = (diff > max_time) ? diff : max_time;
+
+				// Wait 1ms
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
-		}
-	}
-
-	// Add a network bridge to the list
-	void Server::add_bridge(Bridge* bridge)
-	{
-		// Add a bridge to the list
-		const bool ret = m_connected_bridges.add(bridge);
-
-		// Check the result
-		if (ret == true)
-		{
-			// Add client IP address to address list
-			m_ip_book.register_ip(bridge->game_address().ip);
-		}
-		else
-		{
-			// Failed to add the bridge to the list?
-			Logger::Instance().log("Server::add_bridge(): Failed to add a bridge to the list!");
 		}
 	}
 
@@ -1061,11 +1082,39 @@ namespace pkodev
 
 			// Return the bridge to the pool
 			m_bridge_pool->release(bridge);
+
+			// Get the current thread ID
+			std::thread::id this_id = std::this_thread::get_id();
+
+			// Decrease the number of tasks
+			for (auto it = m_workers.begin(); it != m_workers.end(); ++it)
+			{
+				if (it->th.get_id() == this_id)
+				{
+					--it->event_count;
+					break;
+				}
+			}
 		}
 		else
 		{
 			// Failed to remove the bridge from the list?
 			Logger::Instance().log("Server::remove_bridge(): Bridge is not found in the list!");
 		}
+	}
+
+	// Get a list of workers information
+	const std::vector<worker_info_t> Server::make_worker_info() const
+	{
+		// The list of workers
+		std::vector<worker_info_t> info;
+
+		// Make the list . . .
+		for (auto it = m_workers.cbegin(); it != m_workers.cend(); ++it)
+		{
+			info.push_back({ it->th.get_id(), it->event_count.load(), it->max_time.load() });
+		}
+
+		return info;
 	}
 }
