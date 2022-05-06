@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include <algorithm>
+#include <numeric>
 
 namespace pkodev
 {
@@ -251,6 +252,24 @@ namespace pkodev
 		{
 			substrings.push_back(str.substr(start, pos - str.length()));
 		}
+	}
+
+	// Implode a vector of strings into a string
+	std::string utils::string::join(const std::vector<std::string>& substrings, const char delimiter)
+	{
+		// Check that given vector of strings is not empty
+		if (substrings.empty() == true)
+		{
+			return std::string();
+		}
+
+		// Make the string
+		return std::accumulate(next(substrings.begin()), substrings.end(), substrings[0], 
+			[&delimiter](const std::string& a, const std::string& b) -> std::string
+			{
+				return a + delimiter + b;
+			}
+		);
 	}
 
 	// Extract filename from path

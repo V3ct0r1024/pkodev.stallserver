@@ -63,6 +63,9 @@ namespace pkodev
 
 				// Split a string by a delimiter
 				static void split(const std::string& str, std::vector<std::string>& substrings, const char delimiter = ' ');
+
+				// Implode a vector of strings into a string
+				static std::string join(const std::vector<std::string>& substrings, const char delimiter = ' ');
 		};
 
 		// File functions

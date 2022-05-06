@@ -2,6 +2,7 @@
 #include "Server.h"
 #include "Bridge.h"
 #include "SystemNoticePacket.h"
+#include "Utils.h"
 
 #include <iostream>
 
@@ -35,15 +36,18 @@ namespace pkodev
 	bool NoticeConsoleCommand::execute(const std::vector<std::string>& params, Server& server)
 	{
 		// Check that we have one parameter
-		if (params.size() != 1)
+		if (params.empty() == true)
 		{
 			// Wrong syntax
 			std::cout << "Wrong syntax: /" << name() << " [message]" << std::endl;
 			return false;
 		}
 
+		// Build a message
+		const std::string message = pkodev::utils::string::join(params);
+
 		// Check message length
-		if (params[0].length() > 512)
+		if (message.length() > 511)
 		{
 			// Too long message
 			std::cout << "Wrong command: Too long message" << std::endl;
@@ -51,7 +55,7 @@ namespace pkodev
 		}
 
 		// Make system notice packet
-		const SystemNoticePacket packet(params[0]);
+		const SystemNoticePacket packet(message);
 
 		// Send a message to all connected clients
 		server.bridges().for_each(
