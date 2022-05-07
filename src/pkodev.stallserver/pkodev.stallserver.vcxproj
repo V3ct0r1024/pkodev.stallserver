@@ -96,6 +96,7 @@
     <ClCompile Include="DisconnectConsoleCommand.cpp" />
     <ClCompile Include="DisconnectPacket.cpp" />
     <ClCompile Include="FriendInvitePacketHandler.cpp" />
+    <ClCompile Include="GmNoticePacket.cpp" />
     <ClCompile Include="HelpConsoleCommand.cpp" />
     <ClCompile Include="IpAddressBook.cpp" />
     <ClCompile Include="CommEncrypt.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="DisconnectPacket.h" />
     <ClInclude Include="FriendInvitePacketHandler.h" />
     <ClInclude Include="ConsoleCommand.h" />
+    <ClInclude Include="GmNoticePacket.h" />
     <ClInclude Include="HelpConsoleCommand.h" />
     <ClInclude Include="IpAddressBook.h" />
     <ClInclude Include="CommEncrypt.h" />

@@ -169,6 +169,9 @@
     <ClCompile Include="KickConsoleCommand.cpp">
       <Filter>Console Commands</Filter>
     </ClCompile>
+    <ClCompile Include="GmNoticePacket.cpp">
+      <Filter>Packets\S -&gt; C</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChapStringPacketHandler.h">
@@ -305,6 +308,9 @@
     </ClInclude>
     <ClInclude Include="KickConsoleCommand.h">
       <Filter>Console Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="GmNoticePacket.h">
+      <Filter>Packets\S -&gt; C</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

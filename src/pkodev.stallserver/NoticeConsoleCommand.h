@@ -3,12 +3,20 @@
 
 namespace pkodev
 {
+	// Send a message to all connected clients in system/GM chat channel
 	class NoticeConsoleCommand final : public IConsoleCommand
 	{
 		public:
 
+			// Chat channel type
+			enum class channel : unsigned int
+			{
+				system = 0,
+				gm
+			};
+
 			// Constructor
-			NoticeConsoleCommand();
+			NoticeConsoleCommand(const std::string& alias, NoticeConsoleCommand::channel type);
 
 			// Destructor
 			~NoticeConsoleCommand();
@@ -21,6 +29,14 @@ namespace pkodev
 
 			// Execute the command
 			bool execute(const std::vector<std::string>& params, Server& server) override;
+
+		private:
+
+			// Channel
+			channel m_channel;
+
+			// Command name
+			std::string m_name;
 
 	};
 }

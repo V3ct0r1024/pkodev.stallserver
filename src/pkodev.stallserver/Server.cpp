@@ -332,9 +332,10 @@ namespace pkodev
 		m_console_commands.emplace("close", std::make_unique<StopServerConsoleCommand>("close"));
 		m_console_commands.emplace("disconnect", std::make_unique<DisconnectConsoleCommand>());
 		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
-		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>());
+		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>("notice", NoticeConsoleCommand::channel::system));
 		m_console_commands.emplace("stat", std::make_unique<StatConsoleCommand>());
 		m_console_commands.emplace("kick", std::make_unique<KickConsoleCommand>());
+		m_console_commands.emplace("gmnotice", std::make_unique<NoticeConsoleCommand>("gmnotice", NoticeConsoleCommand::channel::gm));
 	}
 
 	// Server destructor
