@@ -1,5 +1,4 @@
 #include "GmNoticePacket.h"
-#include <iostream>
 
 namespace pkodev
 {
@@ -24,7 +23,7 @@ namespace pkodev
 	// Destructor
 	GmNoticePacket::~GmNoticePacket()
 	{
-		std::cout << "GmNoticePacket destructor" << std::endl;
+
 	}
 
 	// Packet ID
