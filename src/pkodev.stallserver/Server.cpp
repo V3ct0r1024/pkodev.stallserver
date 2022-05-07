@@ -379,10 +379,6 @@ namespace pkodev
 		// Delete list of IP addresses
 		m_ip_book.clear();
 
-		// Clear the lists of network bridges
-		m_connected_bridges.clear();
-		m_offline_stall_bridges.clear();
-
 		// Write a log
 		Logger::Instance().log("Final cleanup done!");
 	}
@@ -489,6 +485,7 @@ namespace pkodev
 		);
 
 		// Clear the list of connected network bridges
+		m_offline_stall_bridges.clear();
 		m_connected_bridges.clear();
 
 		// Delete the bridges pool

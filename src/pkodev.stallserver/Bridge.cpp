@@ -146,7 +146,7 @@ namespace pkodev
 		// Reset data structures for exchange with Game.exe and GateServer.exe
 		{
 			// Reset lambda
-			auto ctx_reset = [](endpoint& ctx)
+			auto ctx_reset = [](endpoint& ctx) -> void
 			{
 				// Close socket
 				if (ctx.connected == true)
@@ -1048,21 +1048,26 @@ namespace pkodev
 	void Bridge::on_disconnect(endpoint_type_t side)
 	{
 		// Close connection lambda
-		auto close = [](endpoint& ctx)
+		auto close = [](endpoint& ctx) -> void
 		{
 			// Remove events from the event loop
 			{
 				// Remove read event 
 				event_del(ctx.read_event);
 				event_free(ctx.read_event);
+				ctx.read_event = nullptr;
 
 				// Remove read event 
 				event_del(ctx.write_event);
 				event_free(ctx.write_event);
+				ctx.write_event = nullptr;
 			}
 
 			// Close the socket
 			evutil_closesocket(ctx.socket);
+
+			// Make socket invalid
+			ctx.socket = INVALID_SOCKET;
 
 			// Reset connection flag
 			ctx.connected = false;
