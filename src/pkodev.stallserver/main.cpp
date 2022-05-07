@@ -157,7 +157,7 @@ void Welcome()
 {
     std::cout << "Stall Server version 4.0" << std::endl;
     std::cout << "* Author: V3ct0r from PKODev.NET" << std::endl;
-    std::cout << "* Date: 04/27/2022" << std::endl;
+    std::cout << "* Date: 05/07/2022" << std::endl;
     std::cout << "* URL: https://pkodev.net/profile/3-v3ct0r/" << std::endl << std::endl;
     std::cout << "libevent version: " << event_get_version() << std::endl << std::endl;
 }

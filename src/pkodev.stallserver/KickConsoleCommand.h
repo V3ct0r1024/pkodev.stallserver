@@ -3,6 +3,7 @@
 
 namespace pkodev
 {
+	// Kick a client by character or account from the server console command
 	class KickConsoleCommand final : public IConsoleCommand
 	{
 		public:
@@ -11,7 +12,7 @@ namespace pkodev
 			KickConsoleCommand();
 
 			// Destructor
-			~KickConsoleCommand();
+			~KickConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;

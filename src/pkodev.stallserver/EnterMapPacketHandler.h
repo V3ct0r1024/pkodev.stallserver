@@ -15,7 +15,7 @@ namespace pkodev
 			EnterMapPacketHandler();
 
 			// Destructor
-			~EnterMapPacketHandler();
+			~EnterMapPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

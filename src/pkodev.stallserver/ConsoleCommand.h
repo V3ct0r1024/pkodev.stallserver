@@ -11,6 +11,12 @@ namespace pkodev
 	{
 		public:
 
+			// Constructor
+			IConsoleCommand() = default;
+
+			// Destructor
+			virtual ~IConsoleCommand() = default;
+
 			// Get command name
 			virtual std::string name() const = 0;
 

@@ -15,7 +15,7 @@ namespace pkodev
 			ChapStringPacketHandler();
 
 			// Destructor
-			~ChapStringPacketHandler();
+			~ChapStringPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

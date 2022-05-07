@@ -14,7 +14,7 @@ namespace pkodev
 			DisconnectPacketHandler();
 
 			// Destructor
-			~DisconnectPacketHandler();
+			~DisconnectPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

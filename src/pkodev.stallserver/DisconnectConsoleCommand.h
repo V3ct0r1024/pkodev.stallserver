@@ -3,6 +3,7 @@
 
 namespace pkodev
 {
+	// Disconnect clients from the server console command
 	class DisconnectConsoleCommand final : public IConsoleCommand
 	{
 		public:
@@ -11,7 +12,7 @@ namespace pkodev
 			DisconnectConsoleCommand();
 
 			// Destructor
-			~DisconnectConsoleCommand();
+			~DisconnectConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;
@@ -23,5 +24,4 @@ namespace pkodev
 			bool execute(const std::vector<std::string>& params, Server& server) override;
 
 	};
-
 }

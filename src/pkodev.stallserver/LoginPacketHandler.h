@@ -14,7 +14,7 @@ namespace pkodev
 			LoginPacketHandler();
 
 			// Destructor
-			~LoginPacketHandler();
+			~LoginPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

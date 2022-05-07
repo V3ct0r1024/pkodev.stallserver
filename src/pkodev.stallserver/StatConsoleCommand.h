@@ -3,7 +3,7 @@
 
 namespace pkodev
 {
-	// Show some server statistics
+	// Show the server statistics console command
 	class StatConsoleCommand final : public IConsoleCommand
 	{
 		public:
@@ -12,7 +12,7 @@ namespace pkodev
 			StatConsoleCommand();
 
 			// Destructor
-			~StatConsoleCommand();
+			~StatConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;

@@ -14,7 +14,7 @@ namespace pkodev
 			PersonalMessagePacket();
 
 			// Destructor
-			~PersonalMessagePacket();
+			~PersonalMessagePacket() override;
 
 			// Packet ID
 			unsigned short int id() const override;

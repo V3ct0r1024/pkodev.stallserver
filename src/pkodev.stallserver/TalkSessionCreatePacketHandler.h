@@ -15,7 +15,7 @@ namespace pkodev
 			TalkSessionCreatePacketHandler();
 
 			// Destructor
-			~TalkSessionCreatePacketHandler();
+			~TalkSessionCreatePacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

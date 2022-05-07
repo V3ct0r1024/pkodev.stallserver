@@ -15,7 +15,7 @@ namespace pkodev
 		GmNoticePacket(const std::string& message);
 
 		// Destructor
-		~GmNoticePacket();
+		~GmNoticePacket() override;
 
 		// Packet ID
 		unsigned short int id() const override;

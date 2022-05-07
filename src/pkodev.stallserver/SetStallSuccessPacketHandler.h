@@ -14,7 +14,7 @@ namespace pkodev
 			SetStallSuccessPacketHandler();
 
 			// Destructor
-			~SetStallSuccessPacketHandler();
+			~SetStallSuccessPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

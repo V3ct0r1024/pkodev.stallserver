@@ -15,7 +15,7 @@ namespace pkodev
 			SystemNoticePacket(const std::string& message);
 
 			// Destructor
-			~SystemNoticePacket();
+			~SystemNoticePacket() override;
 
 			// Packet ID
 			unsigned short int id() const override;

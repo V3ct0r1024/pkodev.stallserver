@@ -11,6 +11,12 @@ namespace pkodev
 	{
 		public:
 
+			// Constructor
+			IPoolable() = default;
+
+			// Destructor
+			virtual ~IPoolable() = default;
+
 			// Reset object state
 			virtual void reset() = 0;
 
@@ -20,6 +26,12 @@ namespace pkodev
 	class IPoolableMaker
 	{
 		public:
+
+			// Constructor
+			IPoolableMaker() = default;
+
+			// Destructor
+			virtual ~IPoolableMaker() = default;
 
 			// Create an object
 			virtual IPoolable* create() = 0;

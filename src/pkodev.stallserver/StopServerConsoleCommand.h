@@ -3,7 +3,7 @@
 
 namespace pkodev
 {
-	// Stop server
+	// Stop the server console command
 	class StopServerConsoleCommand final: public IConsoleCommand
 	{
 		public:
@@ -15,7 +15,7 @@ namespace pkodev
 			StopServerConsoleCommand(const std::string& name);
 
 			// Destructor
-			~StopServerConsoleCommand();
+			~StopServerConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;

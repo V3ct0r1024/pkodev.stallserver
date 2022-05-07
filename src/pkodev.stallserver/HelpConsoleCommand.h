@@ -3,8 +3,7 @@
 
 namespace pkodev
 {
-
-	// Show available console commands
+	// Show available console commands console command
 	class HelpConsoleCommand final : public IConsoleCommand
 	{
 		public:
@@ -13,7 +12,7 @@ namespace pkodev
 			HelpConsoleCommand();
 
 			// Destructor
-			~HelpConsoleCommand();
+			~HelpConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;
@@ -25,5 +24,4 @@ namespace pkodev
 			bool execute(const std::vector<std::string>& params, Server& server) override;
 
 	};
-
 }

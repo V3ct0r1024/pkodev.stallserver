@@ -182,7 +182,7 @@ namespace pkodev
 			Bridge(Bridge&&) = delete;
 
 			// Destructor 
-			~Bridge();
+			~Bridge() override;
 
 			// Copy assignment operator
 			Bridge& operator=(const Bridge&) = delete;
@@ -344,6 +344,9 @@ namespace pkodev
 			// Constructor
 			BridgeMaker(Server& server) :
 				m_server(server) { }
+
+			// Destructor
+			virtual ~BridgeMaker() = default;
 
 			// Create a new network bridge
 			IPoolable* create() override

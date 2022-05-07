@@ -15,7 +15,7 @@ namespace pkodev
 			PingRequestPacketHandler();
 
 			// Destructor
-			~PingRequestPacketHandler();
+			~PingRequestPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

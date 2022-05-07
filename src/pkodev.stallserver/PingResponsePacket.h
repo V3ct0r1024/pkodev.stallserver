@@ -14,12 +14,10 @@ namespace pkodev
 			PingResponsePacket();
 
 			// Destructor
-			~PingResponsePacket();
+			~PingResponsePacket() override;
 
 			// Packet ID
 			unsigned short int id() const override;
-
-		private:
 
 	};
 }

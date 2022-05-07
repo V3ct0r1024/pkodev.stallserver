@@ -14,7 +14,7 @@ namespace pkodev
 			CreatePinPacketHandler();
 
 			// Destructor
-			~CreatePinPacketHandler();
+			~CreatePinPacketHandler() override;
 
 			// Packet ID
 			unsigned short int id() const override;

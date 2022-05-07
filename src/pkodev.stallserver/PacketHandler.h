@@ -21,6 +21,12 @@ namespace pkodev
 	{
 		public:
 
+			// Constructor
+			IPacketHandler() = default;
+
+			// Destructor
+			virtual ~IPacketHandler() = default;
+
 			// Packet ID
 			virtual unsigned short int id() const = 0;
 

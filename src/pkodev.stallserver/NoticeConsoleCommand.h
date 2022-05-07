@@ -3,7 +3,7 @@
 
 namespace pkodev
 {
-	// Send a message to all connected clients in system/GM chat channel
+	// Send a message to all connected clients in system/GM chat channel console command
 	class NoticeConsoleCommand final : public IConsoleCommand
 	{
 		public:
@@ -19,7 +19,7 @@ namespace pkodev
 			NoticeConsoleCommand(const std::string& alias, NoticeConsoleCommand::channel type);
 
 			// Destructor
-			~NoticeConsoleCommand();
+			~NoticeConsoleCommand() override;
 
 			// Get command name
 			std::string name() const override;

@@ -11,6 +11,12 @@ namespace pkodev
 	{
 		public:
 
+			// Constructor
+			IPacket() = default;
+
+			// Destructor
+			virtual ~IPacket() = default;
+
 			// Packet ID
 			virtual unsigned short int id() const = 0;
 
@@ -30,7 +36,7 @@ namespace pkodev
 			BasePacket();
 
 			// Destructor
-			virtual ~BasePacket();
+			virtual ~BasePacket() override;
 
 			// Packet size
 			std::size_t size() const override;

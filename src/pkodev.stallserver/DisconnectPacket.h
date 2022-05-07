@@ -15,12 +15,10 @@ namespace pkodev
 			DisconnectPacket();
 
 			// Destructor
-			~DisconnectPacket();
+			~DisconnectPacket() override;
 
 			// Packet ID
 			unsigned short int id() const override;
-
-		private:
 
 	};
 }
