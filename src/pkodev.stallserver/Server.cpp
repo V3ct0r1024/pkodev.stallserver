@@ -328,14 +328,22 @@ namespace pkodev
 		}
 
 		// Create console commands
-		m_console_commands.emplace("stop", std::make_unique<StopServerConsoleCommand>());
-		m_console_commands.emplace("close", std::make_unique<StopServerConsoleCommand>("close"));
-		m_console_commands.emplace("disconnect", std::make_unique<DisconnectConsoleCommand>());
-		m_console_commands.emplace("help", std::make_unique<HelpConsoleCommand>());
-		m_console_commands.emplace("notice", std::make_unique<NoticeConsoleCommand>("notice", NoticeConsoleCommand::channel::system));
-		m_console_commands.emplace("stat", std::make_unique<StatConsoleCommand>());
-		m_console_commands.emplace("kick", std::make_unique<KickConsoleCommand>());
-		m_console_commands.emplace("gmnotice", std::make_unique<NoticeConsoleCommand>("gmnotice", NoticeConsoleCommand::channel::gm));
+		m_console_commands.push_back(std::make_unique<StopServerConsoleCommand>());
+		m_console_commands.push_back(std::make_unique<StopServerConsoleCommand>("close"));
+		m_console_commands.push_back(std::make_unique<DisconnectConsoleCommand>());
+		m_console_commands.push_back(std::make_unique<HelpConsoleCommand>());
+		m_console_commands.push_back(std::make_unique<NoticeConsoleCommand>("notice", NoticeConsoleCommand::channel::system));
+		m_console_commands.push_back(std::make_unique<StatConsoleCommand>());
+		m_console_commands.push_back(std::make_unique<KickConsoleCommand>());
+		m_console_commands.push_back(std::make_unique<NoticeConsoleCommand>("gmnotice", NoticeConsoleCommand::channel::gm));
+	
+		// Sort the list of console commands
+		std::sort(m_console_commands.begin(), m_console_commands.end(),
+			[](const std::unique_ptr<IConsoleCommand>& a, const std::unique_ptr<IConsoleCommand>& b) -> bool
+			{
+				return ((*a).name() < (*b).name());
+			}
+		);
 	}
 
 	// Server destructor
@@ -842,13 +850,19 @@ namespace pkodev
 			params.erase(params.begin());
 
 			// Search the command handler
-			const auto it = m_console_commands.find(command);
+			const auto it = std::find_if(
+				m_console_commands.begin(), m_console_commands.end(),
+				[&command](const std::unique_ptr<IConsoleCommand>& c) -> bool
+				{
+					return ( utils::string::lower_case((*c).name()) == command );
+				}
+			);
 
 			// Check that command is found
 			if (it != m_console_commands.end())
 			{
 				// Execute the command
-				const bool ret = it->second->execute(params, *this);
+				const bool ret = (**it).execute(params, *this);
 
 				// Check the result
 				if (ret == false)

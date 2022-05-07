@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <map>
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -28,7 +27,7 @@ namespace pkodev
 	typedef std::vector<std::string> map_list_t;
 
 	// Define the type of the list of console commands
-	typedef std::map< std::string, std::unique_ptr<IConsoleCommand> > console_command_list_t;
+	typedef std::vector< std::unique_ptr<IConsoleCommand> > console_command_list_t;
 
 	// Stall server exception
 	class server_exception final : public std::runtime_error

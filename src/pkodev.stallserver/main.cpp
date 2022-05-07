@@ -116,7 +116,18 @@ int main(int argc, char *argv[])
             }
 
             // Try to execute the command
-            server.execute_cmd(command);
+            try
+            {
+                server.execute_cmd(command);
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << "An exception occurred while executing the command: " << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cout << "An unknown exception occurred while executing the command!" << std::endl;
+            }
         }
 
         // Print a message that the server is stopping

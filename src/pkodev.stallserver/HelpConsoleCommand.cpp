@@ -44,7 +44,7 @@ namespace pkodev
 
 			for (const auto& c : commands)
 			{
-				std::cout << ++n << ") '/" << c.second->name() << "' - " << c.second->description() << std::endl;
+				std::cout << ++n << ") '/" << c->name() << "' - " << c->description() << std::endl;
 			}
 		}
 		else
