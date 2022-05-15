@@ -44,7 +44,7 @@ namespace pkodev
 		const unsigned short int CMD_CM_BASE = 0;      // Client      -> GameServer
 		const unsigned short int CMD_MC_BASE = 500;    // GameServer  -> Client
 		const unsigned short int CMD_PC_BASE = 5000;   // GroupServer -> Client
-		const unsigned short int CMD_CP_BASE = 6000;   // Client		-> GroupServer
+		const unsigned short int CMD_CP_BASE = 6000;   // Client	  -> GroupServer
 
 		// ID of packet with connection time string from GateServer.exe
 		const unsigned short int CMD_MC_CHAPSTR = 940;
@@ -82,7 +82,7 @@ namespace pkodev
 	};
 
 	// Network address structure
-	struct ip_address final
+	struct address final
 	{
 		// IP address
 		std::string ip;
@@ -91,11 +91,11 @@ namespace pkodev
 		unsigned short int port;
 
 		// Constructor
-		ip_address() :
+		address() :
 			ip(""), port(0) { }
 
 		// Constructor
-		ip_address(const std::string& ip_, unsigned short int port_) :
+		address(const std::string& ip_, unsigned short int port_) :
 			ip(ip_), port(port_) { }
 	};
 
@@ -192,7 +192,7 @@ namespace pkodev
 
 			// Build a network bridge
 			void build(const Server::worker& w, evutil_socket_t fd, 
-				const ip_address& game, const ip_address& gate);
+				const address& game, const address& gate);
 
 			// Remove a network bridge
 			void reset() override;
@@ -204,10 +204,10 @@ namespace pkodev
 			void disconnect();
 
 			// Get Game.exe network address
-			inline const ip_address& game_address() const { return m_client_ctx.address; }
+			inline const address& game_address() const { return m_client_ctx.addr; }
 
 			// Get GateServer.exe network address
-			inline const ip_address& gate_address() const { return m_server_ctx.address; }
+			inline const address& gate_address() const { return m_server_ctx.addr; }
 
 			// Check that Game.exe is connected
 			inline bool game_connected() const { return m_client_ctx.connected; }
@@ -222,7 +222,7 @@ namespace pkodev
 			inline bool send_packet_gate(const IPacket& packet) { return send_packet(m_server_ctx, packet); }
 
 			// Get a reference to the server instance
-			inline Server& server() { return m_server; }
+			inline Server& server() const { return m_server; }
 
 			// Get a reference to the player's data
 			inline player_data& player() { return m_player_data; }
@@ -240,13 +240,14 @@ namespace pkodev
 			// Data for exchange with the network bridge side
 			struct endpoint final
 			{
-				endpoint_type_t type;
-
 				// Socket descriptor
 				evutil_socket_t socket;
 
-				// Address
-				ip_address address;
+				// Connection state
+				bool connected;
+
+				// Number of received packets
+				std::size_t packet_counter;
 
 				// Read event
 				event* read_event;
@@ -254,8 +255,8 @@ namespace pkodev
 				// Write event
 				event* write_event;
 
-				// Connection state
-				bool connected;
+				// Address
+				address addr;
 
 				// Input network buffer for incoming data
 				std::unique_ptr<RingBuffer> recv_buf;
@@ -269,9 +270,6 @@ namespace pkodev
 				// Buffer for outgoing packets processing 
 				std::unique_ptr<LinearBuffer> out_buf;
 
-				// Number of received packets
-				std::size_t packet_counter;
-
 				// Packet encryption keys
 				char enc_recv_key[common::enc_packet_key_len];  // Receive
 				char enc_send_key[common::enc_packet_key_len];  // Send
@@ -284,10 +282,10 @@ namespace pkodev
 			};
 
 			// Socket read event
-			bool on_read(endpoint& to, endpoint& from);
+			bool on_read(endpoint& to, endpoint& from, endpoint_type_t side);
 
 			// Socket write event
-			bool on_write(endpoint& to, endpoint& from);
+			bool on_write(endpoint& to, endpoint& from, endpoint_type_t side);
 
 			// Connection close event
 			void on_disconnect(endpoint_type_t side);
@@ -346,7 +344,7 @@ namespace pkodev
 				m_server(server) { }
 
 			// Destructor
-			virtual ~BridgeMaker() = default;
+			~BridgeMaker() override = default;
 
 			// Create a new network bridge
 			IPoolable* create() override

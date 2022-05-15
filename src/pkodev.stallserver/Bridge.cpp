@@ -9,13 +9,12 @@ namespace pkodev
 	// Constructor of a data structure for network exchange with the network bridge side
 	Bridge::endpoint::endpoint() :
 		socket(INVALID_SOCKET),
+		connected(false), packet_counter(0),
 		read_event(nullptr), write_event(nullptr),
-		connected(false),
-		recv_buf(std::make_unique<RingBuffer>(4 * common::max_packet_size)),
+		recv_buf(std::make_unique<RingBuffer>(2 * common::max_packet_size)),
 		in_buf(std::make_unique<LinearBuffer>(common::max_packet_size)),
-		send_buf(std::make_unique<RingBuffer>(4 * common::max_packet_size)),
-		out_buf(std::make_unique<LinearBuffer>(common::max_packet_size)),
-		packet_counter(0)
+		send_buf(std::make_unique<RingBuffer>(2 * common::max_packet_size)),
+		out_buf(std::make_unique<LinearBuffer>(common::max_packet_size))
 	{
 		std::memset(reinterpret_cast<void*>(enc_recv_key), 0x00, common::enc_packet_key_len);
 		std::memset(reinterpret_cast<void*>(enc_send_key), 0x00, common::enc_packet_key_len);
@@ -53,9 +52,7 @@ namespace pkodev
 		m_event_base(nullptr),
 		m_disconnecting(false), m_reading(false), m_writing(false)
 	{
-		// Set types of bridge sides
-		m_server_ctx.type = endpoint_type_t::gate;
-		m_client_ctx.type = endpoint_type_t::game;
+
 	}
 
 	// Network bridge destructor
@@ -66,7 +63,7 @@ namespace pkodev
 
 	// Build a network bridge
 	void Bridge::build(const Server::worker& w, evutil_socket_t fd, 
-		const ip_address& game, const ip_address& gate)
+		const address& game, const address& gate)
 	{
 		// Save a pointer to the event loop
 		m_event_base = w.evbase;
@@ -76,12 +73,12 @@ namespace pkodev
 
 		// Initialize the data structure for network communication with Game.exe
 		m_client_ctx.socket = fd;
-		m_client_ctx.address = game;
+		m_client_ctx.addr = game;
 		m_client_ctx.connected = true;
 
 		// Initialize the data structure for network communication with GateServer.exe
 		m_server_ctx.socket = INVALID_SOCKET;
-		m_server_ctx.address = gate;
+		m_server_ctx.addr = gate;
 		m_server_ctx.connected = false;
 
 		// Network state flags
@@ -165,8 +162,8 @@ namespace pkodev
 				ctx.out_buf->clear();   // Buffer for outgoing packets processing 
 
 				// Reset the address
-				ctx.address.ip = "0.0.0.0";
-				ctx.address.port = 0;
+				ctx.addr.ip = "0.0.0.0";
+				ctx.addr.port = 0;
 
 				// Reset received packets counter
 				ctx.packet_counter = 0;
@@ -258,8 +255,8 @@ namespace pkodev
 		sockaddr_in remote;
 		std::memset(reinterpret_cast<void*>(&remote), 0x00, sizeof(remote));
 		remote.sin_family = AF_INET;
-		remote.sin_port = htons(m_server_ctx.address.port);
-		ret = inet_pton(AF_INET, m_server_ctx.address.ip.c_str(), &remote.sin_addr);
+		remote.sin_port = htons(m_server_ctx.addr.port);
+		ret = inet_pton(AF_INET, m_server_ctx.addr.ip.c_str(), &remote.sin_addr);
 
 		// Check the result of the inet_pton() function
 		if (ret == SOCKET_ERROR)
@@ -296,7 +293,7 @@ namespace pkodev
 				{
 					// Handle the read event
 					bridge.m_reading = true;
-					const bool ret = bridge.on_read(bridge.m_server_ctx, bridge.m_client_ctx);
+					const bool ret = bridge.on_read(bridge.m_server_ctx, bridge.m_client_ctx, endpoint_type_t::game);
 					bridge.m_reading = false;
 
 					// Check if the event was successfully handled
@@ -313,7 +310,7 @@ namespace pkodev
 				{
 					// Handle the write event
 					bridge.m_writing = true;
-					const bool ret = bridge.on_write(bridge.m_client_ctx, bridge.m_server_ctx);
+					const bool ret = bridge.on_write(bridge.m_client_ctx, bridge.m_server_ctx, endpoint_type_t::game);
 					bridge.m_writing = false;
 
 					// Check if the event was successfully handled
@@ -357,7 +354,7 @@ namespace pkodev
 				{
 					// Handle the read event
 					bridge.m_reading = true;
-					const bool ret = bridge.on_read(bridge.m_client_ctx, bridge.m_server_ctx);
+					const bool ret = bridge.on_read(bridge.m_client_ctx, bridge.m_server_ctx, endpoint_type_t::gate);
 					bridge.m_reading = false;
 
 					// Check if the event was successfully handled
@@ -406,7 +403,7 @@ namespace pkodev
 					{
 						// Handle the write event
 						bridge.m_writing = true;
-						const bool ret = bridge.on_write(bridge.m_server_ctx, bridge.m_client_ctx);
+						const bool ret = bridge.on_write(bridge.m_server_ctx, bridge.m_client_ctx, endpoint_type_t::gate);
 						bridge.m_writing = false;
 
 						// Check if the event was successfully handled
@@ -571,7 +568,7 @@ namespace pkodev
 	}
 
 	// Socket read event
-	bool Bridge::on_read(endpoint& to, endpoint& from)
+	bool Bridge::on_read(endpoint& to, endpoint& from, endpoint_type_t side)
 	{
 		// Temporary buffer for reading data from socket
 		char tmp[common::max_packet_size];
@@ -732,10 +729,8 @@ namespace pkodev
 					if (
 						(packet_id == 0) ||
 						(
-							((packet_id > common::CMD_CM_BASE && packet_id < (common::CMD_CM_BASE + common::CMD_INTERVAL)) == false) &&
-							((packet_id > common::CMD_MC_BASE && packet_id < (common::CMD_MC_BASE + common::CMD_INTERVAL)) == false) &&
-							((packet_id > common::CMD_PC_BASE && packet_id < (common::CMD_PC_BASE + common::CMD_INTERVAL)) == false) &&
-							((packet_id > common::CMD_CP_BASE && packet_id < (common::CMD_CP_BASE + common::CMD_INTERVAL)) == false)
+							( (side == endpoint_type_t::game) && ( ( (packet_id > common::CMD_CM_BASE && packet_id < (common::CMD_CM_BASE + common::CMD_INTERVAL)) == false) && ((packet_id > common::CMD_CP_BASE && packet_id < (common::CMD_CP_BASE + common::CMD_INTERVAL)) == false) ) ) ||
+							( (side == endpoint_type_t::gate) && ( ( (packet_id > common::CMD_MC_BASE && packet_id < (common::CMD_MC_BASE + common::CMD_INTERVAL)) == false) && ((packet_id > common::CMD_PC_BASE && packet_id < (common::CMD_PC_BASE + common::CMD_INTERVAL)) == false) ) )
 						)
 					)
 					{
@@ -745,7 +740,7 @@ namespace pkodev
 
 					// Check that ID of the first packet is 940 (GateServer.exe) or 431 (Game.exe) 
 					if ( (from.packet_counter == 0) &&
-						 ( (packet_id != common::CMD_MC_CHAPSTR) && (packet_id != common::CMD_CM_LOGIN) )
+						 ( (side == endpoint_type_t::gate && packet_id != common::CMD_MC_CHAPSTR) || (side == endpoint_type_t::game && packet_id != common::CMD_CM_LOGIN ) )
 					)
 					{
 						// Incorrect the first packet
@@ -939,7 +934,7 @@ namespace pkodev
 	}
 
 	// Socket write event
-	bool Bridge::on_write(endpoint& to, endpoint& from)
+	bool Bridge::on_write(endpoint& to, endpoint& from, endpoint_type_t side)
 	{
 		// Write the data from output buffer to socket
 		try
