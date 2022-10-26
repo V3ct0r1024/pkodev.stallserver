@@ -17,7 +17,7 @@
 #include "Packet.h"
 #include "LoginPacket.h"
 
-#include <iostream>
+
 
 namespace pkodev
 {
@@ -25,7 +25,7 @@ namespace pkodev
 	namespace common
 	{
 		// Maximum packet size
-		const std::size_t max_packet_size = 4096;
+		const std::size_t max_packet_size = 4 * 4096;
 
 		// Session encryption key length
 		const std::size_t enc_session_key_len = 6;
